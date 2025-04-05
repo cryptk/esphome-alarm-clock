@@ -1,0 +1,72 @@
+font:
+  - file: "fonts/anthosegment-with-different-7.otf"
+    id: seven_segment
+    size: 160
+    bpp: 1
+    glyphs: "0123456789:"
+
+lvgl:
+  id: lgvl_main
+  theme:
+    obj:
+      bg_opa: TRANSP
+      border_side: NONE
+    label:
+      text_color: text_color
+    checkbox:
+      text_color: text_color
+    buttonmatrix:
+      bg_opa: TRANSP
+      border_color: secondary_color
+      border_width: 0
+      text_color: text_color
+      pad_all: 0
+      items: # set all your buttonmatrix buttons to use your custom defined styles and font
+        bg_color: secondary_color
+        bg_grad_color: primary_color
+        bg_grad_dir: VER
+        bg_opa: COVER
+        border_color: secondary_color
+        border_width: 1
+        text_color: text_color
+        # text_font: my_font
+        pressed:
+          bg_color: primary_color
+          bg_grad_color: secondary_color
+        checked:
+          bg_color: primary_color
+          bg_grad_color: secondary_color
+          text_color: primary_color
+
+  style_definitions:
+    - id: page_background
+      bg_opa: TRANSP
+      pad_top: 30
+    - id: header_footer
+      bg_color: secondary_color
+      bg_grad_color: primary_color
+      bg_grad_dir: VER
+      bg_opa: COVER
+      border_opa: TRANSP
+      radius: 0
+      pad_all: 0
+      pad_row: 0
+      pad_column: 0
+      border_color: secondary_color
+      text_color: text_color
+      width: 100%
+      height: 30
+
+color:
+  - id: background_color
+    hex: 0A0A0A
+  - id: seven_segment_off
+    hex: 191919
+  - id: seven_segment_on
+    hex: C81919
+  - id: text_color
+    hex: CCCCCC
+  - id: primary_color
+    hex: 2B2B2B
+  - id: secondary_color
+    hex: 1B1B1B

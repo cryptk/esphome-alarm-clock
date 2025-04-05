@@ -1,0 +1,63 @@
+script:
+  # - id: clockface_register
+  #   parameters:
+  #     clockface: std::string
+  #   then:
+  #     lambda: |-
+  #       auto my_options = id(dropdown_clockface).get_options();
+  #       my_options.push_back(clockface);
+  #       id(dropdown_clockface).set_options(my_options);
+
+  - id: change_clockface
+    parameters:
+      desired_clockface: std::string
+    then:
+      - logger.log:
+          format: "Changing clockface to: %s"
+          args: ['desired_clockface.c_str()']
+      # Make sure to call render_time_display before we swap them so that the new clockface will be pre-rendered
+      - script.execute:
+          id: render_time_display
+          full: true
+      - lvgl.widget.update:
+          id: clock_seven_segment
+          hidden: !lambda 'return strcmp(desired_clockface.c_str(), "Seven-Segment") != 0;'
+      - lvgl.widget.update:
+          id: clock_analog
+          hidden: !lambda 'return strcmp(desired_clockface.c_str(), "Analog") != 0;'
+
+  - id: render_time_display
+    parameters:
+      # Some clockfaces only render opportunistically, like the analog ones typically only rendering hour/minute hands once per minute
+      # Specifying `full: true` requests them to render the entire clock face to ensure everything is correct before it is shown
+      # The clockface also does not render when the clockface page is not showing.  Specifying `full: true` will always result in a render
+      full: bool
+    then:
+      - if:
+          condition:
+            or:
+              - lvgl.page.is_showing: clockface
+              - lambda: 'return full;'
+          then:
+            - lambda: |-
+                auto desired_clockface = id(dropdown_clockface).get_selected_text();
+
+                if (strcmp(desired_clockface.c_str(), "Analog") == 0) {
+                  id(render_analog)->execute(full);
+                } else if (strcmp(desired_clockface.c_str(), "Seven-Segment") == 0) {
+                  id(render_seven_segment)->execute(full);
+                }
+
+  - id: toggle_show_seconds
+    parameters:
+      show_seconds: bool
+    then:
+      - logger.log:
+          format: "Toggling showing of seconds to %d"
+          args: [show_seconds]
+      - lambda: |-
+          id(toggle_show_seconds_analog)->execute(show_seconds);
+          id(toggle_show_seconds_seven_segment)->execute(show_seconds);
+      - script.execute:
+          id: render_time_display
+          full: false

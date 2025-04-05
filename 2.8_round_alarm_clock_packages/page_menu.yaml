@@ -1,0 +1,61 @@
+lvgl:
+  id: lvgl_main
+  pages:
+    - id: menu
+      styles: page_background
+      pad_all: 100
+      on_swipe_up:
+        - script.execute:
+            id: render_time_display
+            full: true
+        - lvgl.page.show:
+            id: clockface
+            animation: OUT_TOP
+            time: ${animation_speed}
+      widgets:
+        - line:
+            points:
+              - 140, 90
+              - 140, 190
+            line_width: 1
+            line_color: secondary_color
+        - line:
+            points:
+              - 140, 115
+              - 140, 165
+            line_width: 3
+            line_color: secondary_color
+        - line:
+            points:
+              - 90, 140
+              - 190, 140
+            line_width: 1
+            line_color: secondary_color
+        - line:
+            points:
+              - 115, 140
+              - 165, 140
+            line_width: 3
+            line_color: secondary_color
+        - buttonmatrix:
+            width: 100%
+            height: 100%
+            bg_opa: TRANSP
+            border_side: NONE
+            items:
+              bg_opa: TRANSP
+              shadow_opa: TRANSP
+              text_color: text_color
+              text_font: montserrat_48
+            rows:
+              - buttons:
+                - id: btn_configuration
+                  text: "\uF013"
+                  on_value:
+                    - lvgl.page.show:
+                        id: configuration
+                        animation: OUT_TOP
+                        time: ${animation_speed}
+                - id: btn_alarms
+                  text: "\uF0F3"
+              - buttons:

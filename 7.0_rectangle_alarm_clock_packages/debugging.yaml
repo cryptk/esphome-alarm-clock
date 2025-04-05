@@ -1,0 +1,13 @@
+button:
+  - platform: template
+    name: Go To Home
+    on_press:
+      - lvgl.page.show: home
+  - platform: template
+    name: Pause Display
+    on_press:
+      - lvgl.pause:
+  - platform: template
+    name: Resume Display
+    on_press:
+      - lvgl.resume:

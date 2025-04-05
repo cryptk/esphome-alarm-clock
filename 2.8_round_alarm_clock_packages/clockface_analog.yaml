@@ -1,0 +1,137 @@
+# esphome:
+#   on_boot: 
+#     - priority: -100
+#       then:
+#         script.execute:
+#           id: clockface_register
+#           clockface: Analog
+
+script:
+  - id: toggle_show_seconds_analog
+    parameters:
+      show_seconds: bool
+    then:
+      - logger.log: Toggling seconds for analog display
+      - if:
+          condition:
+            lambda: 'return show_seconds;'
+          then:
+            - lvgl.indicator.update:
+                id: second_hand
+                opa: 100%
+          else:
+            - lvgl.indicator.update:
+                id: second_hand
+                opa: 0%
+
+  - id: render_analog
+    parameters:
+      full: bool
+    then:
+      # - logger.log: "Rendering analog clock"
+      - if:
+          # We only need to update the minute and hour hands once a minute
+          condition:
+            or:
+              - lambda: 'return id(sntp_time).now().second == 0;'
+              - lambda: 'return full;'
+          then:
+            - lvgl.indicator.update:
+                id: minute_hand
+                value: !lambda |-
+                  return id(sntp_time).now().minute;
+            - lvgl.indicator.update:
+                id: hour_hand
+                value: !lambda |-
+                  auto now = id(sntp_time).now();
+                  return std::fmod(now.hour, 12) * 60 + now.minute;
+      - if:
+          condition:
+            - switch.is_on: switch_show_seconds
+          then:
+            - lvgl.indicator.update:
+                id: second_hand
+                value: !lambda |-
+                  return id(sntp_time).now().second;
+
+lvgl:
+  id: lvgl_main
+  disp_bg_color: 0x000000
+  disp_bg_opa: COVER
+  pages:
+    - id: !extend clockface
+      widgets:
+        - obj: # clock container
+            id: clock_analog
+            height: SIZE_CONTENT
+            width: 480
+            align: CENTER
+            pad_all: 0
+            border_width: 0
+            bg_color: background_color
+            widgets:
+              - meter: # clock face
+                  height: 480
+                  width: 480
+                  align: CENTER
+                  bg_opa: TRANSP
+                  border_width: 0
+                  text_color: text_color
+                  scales:
+                    - range_from: 0 # minutes scale
+                      range_to: 60
+                      angle_range: 360
+                      rotation: 270
+                      ticks:
+                        width: 1
+                        count: 61
+                        length: 10
+                        color: text_color
+                      indicators:
+                        - line:
+                            id: minute_hand
+                            width: 3
+                            color: 0xa6a6a6
+                            r_mod: -25
+                            value: 0
+                        - line:
+                            id: second_hand
+                            width: 2
+                            color: seven_segment_on
+                            r_mod: -4
+                            value: 0
+                    - range_from: 1 # hours scale for labels
+                      range_to: 12
+                      angle_range: 330
+                      rotation: 300
+                      ticks:
+                        width: 1
+                        count: 12
+                        length: 1
+                        major:
+                          stride: 1
+                          width: 4
+                          length: 10
+                          color: 0xC0C0C0
+                          label_gap: 20
+                    - range_from: 0 # hi-res hours scale for hand
+                      range_to: 720
+                      angle_range: 360
+                      rotation: 270
+                      ticks:
+                        count: 0
+                      indicators:
+                        - line:
+                            id: hour_hand
+                            width: 5
+                            color: 0xa6a6a6
+                            r_mod: -50
+                            value: 0
+              # - label:
+              #     styles: date_style
+              #     id: day_label
+              #     y: -30
+              # - label:
+              #     id: date_label
+              #     styles: date_style
+              #     y: 30

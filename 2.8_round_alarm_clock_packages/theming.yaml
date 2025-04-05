@@ -1,0 +1,51 @@
+font:
+  - file: "fonts/anthosegment-with-different-7/anthosegment-with-different-7.otf"
+    id: font_seven_segment
+    size: 100
+    bpp: 1
+    glyphs: "0123456789:"
+
+lvgl:
+  id: lgvl_main
+  theme:
+    obj:
+      bg_opa: TRANSP
+      border_side: NONE
+    label:
+      text_color: text_color
+    checkbox:
+      text_color: text_color
+
+  style_definitions:
+    - id: page_background
+      # bg_opa: TRANSP
+      bg_color: background_color
+
+color:
+  - id: background_color
+    hex: 0A0A0A
+  - id: seven_segment_off
+    hex: 191919
+  - id: seven_segment_on
+    hex: C81919
+  - id: text_color
+    hex: CCCCCC
+  - id: primary_color
+    hex: 2B2B2B
+  - id: secondary_color
+    hex: 1B1B1B
+
+image:
+  - file: https://esphome.io/_static/favicon-512x512.png
+    id: boot_logo
+    resize: 100x100
+    type: RGB565
+    transparency: alpha_channel
+#   - id: clockface_analog
+#     file: "2.8_round_alarm_clock_packages/images/clockface_analog.png"
+#     type: binary
+#     resize: 200x200
+#   - id: clockface_seven_segment
+#     file: "2.8_round_alarm_clock_packages/images/clockface_seven_segment.png"
+#     type: binary
+#     resize: 200x200

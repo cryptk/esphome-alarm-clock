@@ -1,0 +1,71 @@
+# esphome:
+#   on_boot: 
+#     - priority: -100
+#       then:
+#         script.execute:
+#           id: clockface_register
+#           clockface: Seven-Segment
+
+globals:
+  - id: global_seven_segment_format
+    type: std::string
+
+script:
+  - id: toggle_show_seconds_seven_segment
+    parameters:
+      show_seconds: bool
+    then:
+      - logger.log: Toggling seconds for seven segment display
+      - if:
+          condition:
+            lambda: 'return show_seconds;'
+          then:
+            - lvgl.label.update:
+                id: seven_segment_background
+                text: 88:88:88
+            - globals.set:
+                id: global_seven_segment_format
+                value: '"%I:%M:%S"'
+          else:
+            - lvgl.label.update:
+                id: seven_segment_background
+                text: 88:88
+            - globals.set:
+                id: global_seven_segment_format
+                value: '"%I:%M"'
+
+  - id: render_seven_segment
+    parameters:
+      full: bool
+    then:
+      # - logger.log: "Rendering seven segment clock"
+      - lvgl.label.update:
+          id: seven_segment_foreground
+          text: !lambda |-
+            auto format = id(global_seven_segment_format);
+            auto time = id(sntp_time).now().strftime(format.c_str());
+            return time;
+lvgl:
+  id: lvgl_main
+  pages:
+    - id: !extend clockface
+      widgets:
+        - obj:
+            id: clock_seven_segment
+            align: CENTER
+            x: 0
+            y: 0
+            width: 100%
+            height: 100%
+            hidden: true
+            widgets:
+              - label:
+                  align: CENTER
+                  id: seven_segment_background
+                  text_font: font_seven_segment
+                  text_color: seven_segment_off
+              - label:
+                  align: CENTER
+                  id: seven_segment_foreground
+                  text_font: font_seven_segment
+                  text_color: seven_segment_on

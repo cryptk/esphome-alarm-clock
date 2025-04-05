@@ -1,0 +1,63 @@
+substitutions:
+  name: alarm-clock-prototype-host
+  friendly_name: Alarm Clock Prototype Host
+  page_change_animation: FADE_IN
+  # page_change_animation: OVER_RIGHT
+  animation_speed: 500ms
+
+packages:
+  common: !include 2.8_round_alarm_clock_packages/common.yaml
+  debugging: !include 2.8_round_alarm_clock_packages/debugging.yaml
+  theming: !include 2.8_round_alarm_clock_packages/theming.yaml
+  clockface_abstraction: !include 2.8_round_alarm_clock_packages/clockface_abstraction.yaml
+  clockface_seven_segment: !include 2.8_round_alarm_clock_packages/clockface_seven_segment.yaml
+  clockface_analog: !include 2.8_round_alarm_clock_packages/clockface_analog.yaml
+  page_clockface: !include 2.8_round_alarm_clock_packages/page_clockface.yaml # Make sure the clockface page is included first so that it will be the first page displayed
+  page_configuration: !include 2.8_round_alarm_clock_packages/page_configuration.yaml
+  page_menu: !include 2.8_round_alarm_clock_packages/page_menu.yaml
+  alarm: !include 2.8_round_alarm_clock_packages/alarm.yaml
+
+host:
+
+logger:
+  # level: WARN
+  # level: VERY_VERBOSE
+
+# esphome:
+#   on_boot: 
+#     - priority: -200
+#       then:
+#         lvgl.page.show: configuration
+      
+
+# Write preferences to flash a little more frequently
+preferences:
+  flash_write_interval: 15s
+
+# external_components:
+#   # - source: github://pr#8494
+#   #   components: [lvgl]
+#   - source:
+#       type: git
+#       url: file:///home/cryptk/Documents/sourcecode/esphome/git
+#       ref: lvgl_double_buffering
+#     components: [lvgl]
+
+touchscreen:
+  platform: sdl
+
+display:
+  - platform: sdl
+    show_test_card: true
+    dimensions:
+      width: 480
+      height: 480
+
+time:
+  - platform: host
+    id: sntp_time
+    timezone: America/Chicago
+
+lvgl:
+  id: lvgl_main
+  log_level: VERBOSE

@@ -1,0 +1,128 @@
+globals:
+  - id: system_initialized
+    type: bool
+    initial_value: "false"
+
+script:
+  - id: initialize_clock
+    then:
+      # - delay: 10s # Used to delay startup until after logs are showing
+      - lvgl.page.show: clockface
+      - logger.log: "Configuring seconds display"
+      - script.execute:
+          id: toggle_show_seconds
+          show_seconds: !lambda 'return id(switch_show_seconds).state;'
+      - logger.log: "Setting clockface for startup"
+      - script.execute:
+          id: change_clockface
+          desired_clockface: !lambda 'return id(dropdown_clockface).get_selected_text().c_str();'
+      - logger.log: "Waiting for time sync"
+      - wait_until:
+          time.has_time:
+      - logger.log:
+          format: "Current time is: %s"
+          args: [id(sntp_time).now().strftime("%I:%M:%S").c_str()]
+      - logger.log: "Rendering time display"
+      - script.execute:
+          id: render_time_display
+          full: true
+      - logger.log: "Bootup complete, showing home screen"
+      - wait_until:
+          lvgl.page.is_showing: clockface # We told it go to to the home page, but this can take some time.  Sometimes it takes more time than all the other initialization.
+      # Mark system as being initialized
+      - globals.set:
+          id: system_initialized
+          value: "true"
+      - lvgl.widget.hide: boot_screen
+
+switch:
+  - platform: lvgl
+    id: switch_show_seconds
+    widget: checkbox_time_display_seconds
+    name: Show Seconds
+    restore_mode: RESTORE_DEFAULT_OFF
+    web_server:
+      sorting_group_id: clockface_settings
+    on_turn_on:
+      - script.execute:
+          id: toggle_show_seconds
+          show_seconds: true
+    on_turn_off:
+      - script.execute:
+          id: toggle_show_seconds
+          show_seconds: false
+
+select:
+  - platform: lvgl
+    name: "Clockface"
+    id: select_clockface
+    widget: dropdown_clockface
+    web_server:
+      sorting_group_id: clockface_settings
+    restore_value: true
+
+lvgl:
+  id: lvgl_main
+  pages: 
+    - id: configuration
+      styles: page_background
+      on_swipe_down:
+        - lvgl.page.show:
+            id: menu
+            animation: OVER_BOTTOM
+            time: ${animation_speed}
+      on_swipe_up:
+        - script.execute:
+            id: render_time_display
+            full: true
+        - lvgl.page.show:
+            id: clockface
+            animation: OUT_TOP
+            time: ${animation_speed}
+      widgets:
+        - obj:
+            align: CENTER
+            width: 100%
+            height: 100%
+            layout:
+              type: grid
+              grid_rows: [FR(1),FR(1),FR(1),FR(1),FR(1),FR(1)]
+              grid_columns: [FR(1),FR(1)]
+            widgets:
+              - label:
+                  text: "Timezone"
+                  grid_cell_row_pos: 0
+                  grid_cell_column_pos: 0
+              - dropdown:
+                  grid_cell_row_pos: 0
+                  grid_cell_column_pos: 1
+                  width: 200
+                  options:
+                    - America/Chicago
+                    - two49
+                    - three
+              - label:
+                  text: "Show Seconds"
+                  grid_cell_row_pos: 1
+                  grid_cell_column_pos: 0
+              - checkbox:
+                  id: checkbox_time_display_seconds
+                  grid_cell_row_pos: 1
+                  grid_cell_column_pos: 1
+                  text: ""
+              - label:
+                  text: "Clockface"
+                  grid_cell_row_pos: 2
+                  grid_cell_column_pos: 0
+              - dropdown:
+                  id: dropdown_clockface
+                  grid_cell_row_pos: 2
+                  grid_cell_column_pos: 1
+                  width: 200
+                  options:
+                    - Analog
+                    - Seven-Segment
+                  on_value:
+                    - script.execute:
+                        id: change_clockface
+                        desired_clockface: !lambda 'return id(dropdown_clockface).get_selected_text().c_str();'

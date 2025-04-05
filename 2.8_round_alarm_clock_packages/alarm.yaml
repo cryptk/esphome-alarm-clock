@@ -1,0 +1,153 @@
+# This pacakge contains everything needed to create a single alarm
+# It can be included multiple times providing different names to support multiple alarms
+# TODO:
+# - Maybe replace this with a custom component to clean things up
+# - Ensure that skipped alarms (I.E: Daylight Savings) will still go off
+
+web_server:
+  id: my_web_server
+  sorting_groups:
+    - id: ${name}_settings
+      name: ${friendly_name} Settings
+
+number:
+  - platform: template
+    id: ${name}_hours
+    name: "${friendly_name} Hours"
+    optimistic: true
+    min_value: 0
+    max_value: 23
+    step: 1
+    restore_value: true
+    initial_value: 7
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 20
+  - platform: template
+    id: ${name}_minutes
+    name: "${friendly_name} Minutes"
+    optimistic: true
+    min_value: 0
+    max_value: 59
+    step: 1
+    restore_value: true
+    initial_value: 0
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 30
+
+switch:
+  - platform: template
+    id: ${name}_enabled
+    name: "${friendly_name} Enabled"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 10
+  - platform: template
+    id: ${name}_monday
+    name: "${friendly_name} Monday"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 40
+  - platform: template
+    id: ${name}_tuesday
+    name: "${friendly_name} Tuesday"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 50
+  - platform: template
+    id: ${name}_wednesday
+    name: "${friendly_name} Wednesday"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 60
+  - platform: template
+    id: ${name}_thursday
+    name: "${friendly_name} Thursday"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 70
+  - platform: template
+    id: ${name}_friday
+    name: "${friendly_name} Friday"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 80
+  - platform: template
+    id: ${name}_saturday
+    name: "${friendly_name} Saturday"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 90
+  - platform: template
+    id: ${name}_sunday
+    name: "${friendly_name} Sunday"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 100
+
+script:
+  - id: trigger_alarm_${name}
+    then:
+      - logger.log: "Alarm for ${friendly_name} has triggered!"
+
+  - id: check_alarm_${name}
+    then:
+      - logger.log:
+          format: "Checking if alarm ${friendly_name} needs to fire. hours: %d, minutes: %d, dow: %d"
+          args: ['id(sntp_time).now().hour', 'id(sntp_time).now().minute', 'id(sntp_time).now().day_of_week']
+      - if:
+          condition:
+            # Is the alarm enabled
+            - switch.is_on: ${name}_enabled
+            # is it the right hour of the day
+            - lambda: |-
+                return id(${name}_hours).state == id(sntp_time).now().hour;
+            # is it the right minute of the day
+            - lambda: |-
+                return id(${name}_minutes).state == id(sntp_time).now().minute;
+            #is it the right day of the week
+            - lambda: |-
+                auto dow = id(sntp_time).now().day_of_week;
+                switch (dow) {
+                  case 1:
+                    return id(${name}_monday).state;
+                    break;
+                  case 2:
+                    return id(${name}_tuesday).state;
+                    break;
+                  case 3:
+                    return id(${name}_wednesday).state;
+                    break;
+                  case 4:
+                    return id(${name}_thursday).state;
+                    break;
+                  case 5:
+                    return id(${name}_friday).state;
+                    break;
+                  case 6:
+                    return id(${name}_saturday).state;
+                    break;
+                  case 7:
+                    return id(${name}_sunday).state;
+                    break;
+                }
+                return false;
+          then:
+            script.execute: trigger_alarm_${name}

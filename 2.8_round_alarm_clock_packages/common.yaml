@@ -1,0 +1,79 @@
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  on_boot: 
+    - priority: -200  # LVGL runs with setup_priority::PROCESSOR which is 400.  We want to run this just after LVGL is initialized
+      then:
+      - script.execute: initialize_clock
+
+# Enable logging
+logger:
+
+interval:
+  - interval: 1s
+    then:
+      - if:
+          condition:
+            time.has_time:
+          then:
+            - script.execute: time_tick
+
+script:
+  # This script gets called every second by the time component but will only take action if the system has completed initialization
+  - id: time_tick
+    then:
+      - if:
+          condition:
+            lambda: 'return id(system_initialized);'
+          then:
+            - script.execute:
+                id: render_time_display
+                full: false
+      - if:
+          condition:
+            lambda: 'return id(sntp_time).now().second == 0;'
+          then:
+            - logger.log: "Running alarm check scripts"
+            - script.execute: check_alarm_alarm_one
+            - script.execute: check_alarm_alarm_two
+
+lvgl:
+  id: lvgl_main
+  default_font: montserrat_24
+  top_layer:
+    widgets:
+      - obj:
+          id: boot_screen
+          x: 0
+          y: 0
+          width: 100%
+          height: 100%
+          bg_color: background_color
+          bg_opa: COVER
+          radius: 0
+          pad_all: 0
+          border_width: 0
+          widgets:
+            - image:
+                align: CENTER
+                src: boot_logo
+                y: -40
+            - spinner:
+                align: CENTER
+                y: 95
+                height: 50
+                width: 50
+                spin_time: 1s
+                arc_length: 60deg
+                arc_width: 8
+                indicator:
+                  arc_color: 0x18bcf2
+                  arc_width: 8
+  pages: 
+    - id: updating
+      styles: page_background
+      skip: true
+      widgets:
+        - bar:
+            id: update_progress_bar
+            align: CENTER

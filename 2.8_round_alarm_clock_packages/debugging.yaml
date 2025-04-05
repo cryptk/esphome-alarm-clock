@@ -1,0 +1,31 @@
+debug:
+  # Only update the debug information once a minute.  It doesn't change that often and the LVGL renders can take different amounts
+  # of time as the second hand (if analog clockface) moves around causing larger and smaller rectangles to need to be redrawn.
+  update_interval: 60s
+
+sensor:
+  - platform: debug
+    # free:
+    #   name: "Heap Free"
+    # block:
+    #   name: "Heap Max Block"
+    loop_time:
+      name: "Loop Time"
+    # psram:
+    #   name: "Free PSRAM"
+  # - platform: internal_temperature
+  #   name: "Internal Temperature"
+
+button:
+  - platform: template
+    name: Go To Clockface
+    on_press:
+      - lvgl.page.show: clockface
+  - platform: template
+    name: Pause Display
+    on_press:
+      - lvgl.pause:
+  - platform: template
+    name: Resume Display
+    on_press:
+      - lvgl.resume:
