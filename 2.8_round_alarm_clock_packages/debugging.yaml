@@ -1,7 +1,7 @@
 debug:
   # Only update the debug information once a minute.  It doesn't change that often and the LVGL renders can take different amounts
   # of time as the second hand (if analog clockface) moves around causing larger and smaller rectangles to need to be redrawn.
-  update_interval: 60s
+  update_interval: 5s
 
 sensor:
   - platform: debug
