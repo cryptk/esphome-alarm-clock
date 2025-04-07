@@ -102,6 +102,7 @@ namespace esphome
       ACC_SELF_TEST_DISENABLE = 0,
       ACC_SELF_TEST_ENABLE,
     } qmi8658_acc_self_test_t;
+    static constexpr uint8_t QMI8658_ACC_SELF_TEST_OFFSET = 7;
 
     typedef enum
     {
@@ -110,6 +111,7 @@ namespace esphome
       ACC_SCALE_8G,
       ACC_SCALE_16G,
     } qmi8658_acc_scale_t;
+    static constexpr uint8_t QMI8658_ACC_SCALE_OFFSET = 4;
 
     typedef enum
     {
@@ -120,12 +122,14 @@ namespace esphome
       ACC_OUTPUT_DATA_RATE_62_5HZ,
       ACC_OUTPUT_DATA_RATE_31_25HZ,
     } qmi8658_acc_odr_t;
+    static constexpr uint8_t QMI8658_ACC_OUTPUT_DATA_RATE_OFFSET = 0;
 
     typedef enum
     {
       GYRO_SELF_TEST_DISENABLE = 0,
       GYRO_SELF_TEST_ENABLE,
     } qmi8658_gyro_self_test_t;
+    static constexpr uint8_t QMI8658_GYRO_SELF_TEST_OFFSET = 7;
 
     typedef enum
     {
@@ -138,6 +142,7 @@ namespace esphome
       GYRO_SCALE_1024DPS,
       GYRO_SCALE_2048DPS,
     } qmi8658_gyro_scale_t;
+    static constexpr uint8_t QMI8658_GYRO_SCALE_OFFSET = 4;
 
     typedef enum
     {
@@ -151,6 +156,7 @@ namespace esphome
       GYRO_OUTPUT_DATA_RATE_56_05,
       GYRO_OUTPUT_DATA_RATE_28_025,
     } qmi8658_gyro_odr_t;
+    static constexpr uint8_t QMI8658_GYRO_OUTPUT_DATA_RATE_OFFSET = 0;
 
     // const float GRAVITY_EARTH = 9.80665f;
 
@@ -158,6 +164,42 @@ namespace esphome
     int16_t combine_bytes(uint8_t low, uint8_t high)
     {
       return (int16_t)((high << 8) | low);
+    }
+
+    void QMI8658Component::set_register_value(uint8_t register_address, uint8_t value, uint8_t offset)
+    {
+    }
+
+    void QMI8658Component::configure_accel_output_data_rate()
+    {
+      uint8_t data_rate_value;
+      switch (this->accel_output_data_rate_)
+      {
+      case 1000:
+        data_rate_value = ACC_OUTPUT_DATA_RATE_1000HZ;
+        break;
+      case 500:
+        data_rate_value = ACC_OUTPUT_DATA_RATE_500HZ;
+        break;
+      case 250:
+        data_rate_value = ACC_OUTPUT_DATA_RATE_250HZ;
+        break;
+      case 125:
+        data_rate_value = ACC_OUTPUT_DATA_RATE_125HZ;
+        break;
+      case 63:
+        data_rate_value = ACC_OUTPUT_DATA_RATE_62_5HZ;
+        break;
+      case 31:
+        data_rate_value = ACC_OUTPUT_DATA_RATE_31_25HZ;
+        break;
+      }
+
+      data_rate_value << QMI8658_ACC_OUTPUT_DATA_RATE_OFFSET;
+
+      ESP_LOGD(TAG, "Data rate value: %d", data_rate_value);
+
+      this->write_byte(QMI8658_REG_CTRL1, data_rate_value);
     }
 
     void QMI8658Component::setup()
@@ -189,6 +231,7 @@ namespace esphome
       this->write_byte(QMI8658_REG_CTRL1, ctrl1);
 
       // Set Acceleromenter Output Data Rate to 1000Hz, full-scale +/- 2g
+      this->configure_accel_output_data_rate();
       this->write_byte(QMI8658_REG_CTRL2, 0x03);
       // Set Gyro Output Data Rate to 896.8Hz, Full-scale +/- 2048dps
       this->write_byte(QMI8658_REG_CTRL3, 0x73);
@@ -218,6 +261,7 @@ namespace esphome
       LOG_SENSOR("  ", "Gyro Y", this->gyro_y_sensor_);
       LOG_SENSOR("  ", "Gyro Z", this->gyro_z_sensor_);
       LOG_SENSOR("  ", "Temperature", this->temperature_sensor_);
+      ESP_LOGCONFIG(TAG, "  Acceleration Output Data Rate: %d", this->accel_output_data_rate_);
     }
 
     void QMI8658Component::update()

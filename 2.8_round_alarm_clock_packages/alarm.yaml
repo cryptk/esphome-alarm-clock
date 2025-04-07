@@ -111,7 +111,12 @@ script:
     then:
       - logger.log:
           format: "Checking if alarm ${friendly_name} needs to fire. hours: %d, minutes: %d, dow: %d"
-          args: ['id(sntp_time).now().hour', 'id(sntp_time).now().minute', 'id(sntp_time).now().day_of_week']
+          args:
+            [
+              "id(sntp_time).now().hour",
+              "id(sntp_time).now().minute",
+              "id(sntp_time).now().day_of_week",
+            ]
       - if:
           condition:
             # Is the alarm enabled

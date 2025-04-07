@@ -6,16 +6,15 @@ globals:
 script:
   - id: initialize_clock
     then:
-      # - delay: 10s # Used to delay startup until after logs are showing
       - lvgl.page.show: clockface
       - logger.log: "Configuring seconds display"
       - script.execute:
           id: toggle_show_seconds
-          show_seconds: !lambda 'return id(switch_show_seconds).state;'
+          show_seconds: !lambda "return id(switch_show_seconds).state;"
       - logger.log: "Setting clockface for startup"
       - script.execute:
           id: change_clockface
-          desired_clockface: !lambda 'return id(dropdown_clockface).get_selected_text().c_str();'
+          desired_clockface: !lambda "return id(dropdown_clockface).get_selected_text().c_str();"
       - logger.log: "Waiting for time sync"
       - wait_until:
           time.has_time:
@@ -34,6 +33,7 @@ script:
           id: system_initialized
           value: "true"
       - lvgl.widget.hide: boot_screen
+      - logger.log: "Initialization complete!"
 
 switch:
   - platform: lvgl
@@ -63,7 +63,7 @@ select:
 
 lvgl:
   id: lvgl_main
-  pages: 
+  pages:
     - id: configuration
       styles: page_background
       on_swipe_down:
@@ -86,8 +86,8 @@ lvgl:
             height: 100%
             layout:
               type: grid
-              grid_rows: [FR(1),FR(1),FR(1),FR(1),FR(1),FR(1)]
-              grid_columns: [FR(1),FR(1)]
+              grid_rows: [FR(1), FR(1), FR(1), FR(1), FR(1), FR(1)]
+              grid_columns: [FR(1), FR(1)]
             widgets:
               - label:
                   text: "Timezone"
@@ -125,4 +125,4 @@ lvgl:
                   on_value:
                     - script.execute:
                         id: change_clockface
-                        desired_clockface: !lambda 'return id(dropdown_clockface).get_selected_text().c_str();'
+                        desired_clockface: !lambda "return id(dropdown_clockface).get_selected_text().c_str();"

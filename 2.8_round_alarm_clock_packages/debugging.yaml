@@ -5,10 +5,10 @@ debug:
 
 sensor:
   - platform: debug
-    # free:
-    #   name: "Heap Free"
-    # block:
-    #   name: "Heap Max Block"
+    free:
+      name: "Heap Free"
+    block:
+      name: "Heap Max Block"
     loop_time:
       name: "Loop Time"
     # psram:

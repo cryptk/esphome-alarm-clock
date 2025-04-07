@@ -1,5 +1,5 @@
 # esphome:
-#   on_boot: 
+#   on_boot:
 #     - priority: -100
 #       then:
 #         script.execute:
@@ -14,7 +14,7 @@ script:
       - logger.log: Toggling seconds for analog display
       - if:
           condition:
-            lambda: 'return show_seconds;'
+            lambda: "return show_seconds;"
           then:
             - lvgl.indicator.update:
                 id: second_hand
@@ -28,23 +28,33 @@ script:
     parameters:
       full: bool
     then:
-      # - logger.log: "Rendering analog clock"
       - if:
           # We only need to update the minute and hour hands once a minute
           condition:
             or:
-              - lambda: 'return id(sntp_time).now().second == 0;'
-              - lambda: 'return full;'
+              - lambda: "return id(sntp_time).now().second == 0;"
+              - lambda: "return full;"
           then:
-            - lvgl.indicator.update:
-                id: minute_hand
-                value: !lambda |-
-                  return id(sntp_time).now().minute;
-            - lvgl.indicator.update:
-                id: hour_hand
-                value: !lambda |-
-                  auto now = id(sntp_time).now();
-                  return std::fmod(now.hour, 12) * 60 + now.minute;
+            - lambda: |-
+                // We update the clock hands in a lambda like this so that we can guarantee they are all
+                // updated in the same render pass for LVGL.  This optimizes the re-draw of the clock face
+                // a bit as compared to three separate lvgl.indicator.update calls which may or may not all
+                // be rendered on the same LVGL update loop.
+                auto my_time = id(sntp_time).now();
+                lv_meter_set_indicator_value(id(clockface_analog), id(minute_hand), my_time.minute);
+                lv_meter_set_indicator_value(id(clockface_analog), id(hour_hand), my_time.hour);
+                if(id(switch_show_seconds).state) {
+                  lv_meter_set_indicator_value(id(clockface_analog), id(second_hand), my_time.second);
+                }
+          else:
+            - if:
+                condition:
+                  - switch.is_on: switch_show_seconds
+                then:
+                  - lvgl.indicator.update:
+                      id: second_hand
+                      value: !lambda |-
+                        return id(sntp_time).now().second;
       - if:
           condition:
             - switch.is_on: switch_show_seconds
@@ -56,8 +66,6 @@ script:
 
 lvgl:
   id: lvgl_main
-  disp_bg_color: 0x000000
-  disp_bg_opa: COVER
   pages:
     - id: !extend clockface
       widgets:
@@ -69,8 +77,11 @@ lvgl:
             pad_all: 0
             border_width: 0
             bg_color: background_color
+            bg_image_src: image_clockface_analog_background
+            bg_opa: COVER
             widgets:
               - meter: # clock face
+                  id: clockface_analog
                   height: 480
                   width: 480
                   align: CENTER
@@ -83,10 +94,11 @@ lvgl:
                       angle_range: 360
                       rotation: 270
                       ticks:
-                        width: 1
-                        count: 61
-                        length: 10
-                        color: text_color
+                        count: 0
+                        # width: 1
+                        # count: 61
+                        # length: 10
+                        # color: text_color
                       indicators:
                         - line:
                             id: minute_hand
@@ -105,15 +117,16 @@ lvgl:
                       angle_range: 330
                       rotation: 300
                       ticks:
-                        width: 1
-                        count: 12
-                        length: 1
-                        major:
-                          stride: 1
-                          width: 4
-                          length: 10
-                          color: 0xC0C0C0
-                          label_gap: 20
+                        count: 0
+                        # width: 1
+                        # count: 12
+                        # length: 1
+                        # major:
+                        #   stride: 1
+                        #   width: 4
+                        #   length: 10
+                        #   color: 0xC0C0C0
+                        #   label_gap: 20
                     - range_from: 0 # hi-res hours scale for hand
                       range_to: 720
                       angle_range: 360
@@ -127,11 +140,11 @@ lvgl:
                             color: 0xa6a6a6
                             r_mod: -50
                             value: 0
-              # - label:
-              #     styles: date_style
-              #     id: day_label
-              #     y: -30
-              # - label:
-              #     id: date_label
-              #     styles: date_style
-              #     y: 30
+            # - label:
+            #     styles: date_style
+            #     id: day_label
+            #     y: -30
+            # - label:
+            #     id: date_label
+            #     styles: date_style
+            #     y: 30

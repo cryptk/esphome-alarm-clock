@@ -1,13 +1,17 @@
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
-  on_boot: 
-    - priority: -200  # LVGL runs with setup_priority::PROCESSOR which is 400.  We want to run this just after LVGL is initialized
+  on_boot:
+    - priority: -200 # LVGL runs with setup_priority::PROCESSOR which is 400.  We want to run this just after LVGL is initialized
       then:
-      - script.execute: initialize_clock
+        - script.execute: initialize_clock
 
 # Enable logging
 logger:
+
+button:
+  - platform: restart
+    name: "Restart"
 
 interval:
   - interval: 1s
@@ -24,22 +28,27 @@ script:
     then:
       - if:
           condition:
-            lambda: 'return id(system_initialized);'
+            lambda: "return id(system_initialized);"
           then:
             - script.execute:
                 id: render_time_display
                 full: false
       - if:
           condition:
-            lambda: 'return id(sntp_time).now().second == 0;'
+            lambda: "return id(sntp_time).now().second == 0;"
           then:
             - logger.log: "Running alarm check scripts"
-            - script.execute: check_alarm_alarm_one
-            - script.execute: check_alarm_alarm_two
+            # - script.execute: check_alarm_alarm_one
+            # - script.execute: check_alarm_alarm_two
 
 lvgl:
   id: lvgl_main
   default_font: montserrat_24
+  disp_bg_color: background_color
+  disp_bg_opa: COVER
+  buffer_size: 1.0
+  # buffer_size: 0.12
+  # buffer_size: 0.25
   top_layer:
     widgets:
       - obj:
@@ -69,7 +78,7 @@ lvgl:
                 indicator:
                   arc_color: 0x18bcf2
                   arc_width: 8
-  pages: 
+  pages:
     - id: updating
       styles: page_background
       skip: true

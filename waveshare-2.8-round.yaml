@@ -30,7 +30,9 @@ esp32:
   flash_size: 16MB
   framework:
     type: esp-idf
-    sdkconfig_options: 
+    advanced:
+      enable_idf_experimental_features: yes
+    sdkconfig_options:
       CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: y
       CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240: y
       CONFIG_ESPTOOLPY_FLASHMODE_QIO: y
@@ -39,13 +41,14 @@ esp32:
       CONFIG_ESP32S3_DATA_CACHE_LINE_64B: y
       CONFIG_SPIRAM_FETCH_INSTRUCTIONS: y
       CONFIG_SPIRAM_RODATA: y
-      CONFIG_IDF_EXPERIMENTAL_FEATURES: y
       CONFIG_COMPILER_OPTIMIZATION_PERF: y
       CONFIG_LV_MEMCPY_MEMSET_STD: y
+      CONFIG_ESP_MAIN_TASK_AFFINITY_CPU1: y
+      CONFIG_LV_DISP_DEF_REFR_PERIOD: "10"
       CONFIG_LV_ATTRIBUTE_FAST_MEM_USE_IRAM: y
       CONFIG_I2S_SUPPRESS_DEPRECATE_WARN: y
-      # CONFIG_ESPTOOLPY_FLASHFREQ_120M: y
-      # CONFIG_BOOTLOADER_FLASH_DC_AWARE: y
+      CONFIG_ESPTOOLPY_FLASHFREQ_120M: y
+      CONFIG_BOOTLOADER_FLASH_DC_AWARE: y
 
 # Write preferences to flash a little more frequently
 preferences:
@@ -54,6 +57,10 @@ preferences:
 external_components:
   - source: github://pr#8494
     components: [lvgl]
+  - source: github://pr#8519
+    # This PR enables 120MHz HBM mode for octal psram
+    components: [esp32, psram]
+    refresh: 1h
   - source:
       type: local
       path: components
@@ -69,7 +76,7 @@ psram:
   # More testing needed, especially to validate stability
   # https://github.com/esphome/esphome/pull/8477
   mode: octal
-  speed: 80MHz
+  speed: 120MHz
 
 ota:
   - platform: esphome
@@ -105,7 +112,7 @@ api:
     key: !secret api_encryption_key
 
 captive_portal:
-    
+
 web_server:
   id: my_web_server
   port: 80
@@ -121,8 +128,8 @@ i2c:
     frequency: 100kHz
 
 i2s_audio:
-  i2s_lrclk_pin: GPIO19  # D- on 12-pin connector
-  i2s_bclk_pin: GPIO20   # D+ on 12-pin connector
+  i2s_lrclk_pin: GPIO19 # D- on 12-pin connector
+  i2s_bclk_pin: GPIO20 # D+ on 12-pin connector
 
 speaker:
   - platform: i2s_audio
@@ -169,12 +176,12 @@ media_player:
     buffer_size: 1000000
     announcement_pipeline:
       speaker: announcement_resampling_speaker
-      format: FLAC     # FLAC is the least processor intensive codec
-      num_channels: 1  # Stereo audio is unnecessary for announcements
+      format: FLAC # FLAC is the least processor intensive codec
+      num_channels: 1 # Stereo audio is unnecessary for announcements
       sample_rate: 48000
     media_pipeline:
       speaker: media_resampling_speaker
-      format: FLAC     # FLAC is the least processor intensive codec
+      format: FLAC # FLAC is the least processor intensive codec
       num_channels: 1
       sample_rate: 48000
     on_announcement:
@@ -193,7 +200,7 @@ spi:
 # TCA9554 GPIO extender
 pca9554:
   - id: gpio_expander
-    i2c_id: i2c_bus 
+    i2c_id: i2c_bus
     address: 0x20
 
 switch:
@@ -203,10 +210,9 @@ switch:
       number: 7
     name: "Buzzer"
 
-
 # Backlight PWM output and light component
 output:
-    # Backlight LED
+  # Backlight LED
   - platform: ledc
     id: gpio_backlight_pwm
     pin: GPIO06
@@ -254,11 +260,12 @@ display:
     hsync_pin: GPIO38
     vsync_pin: GPIO39
     pclk_pin: GPIO41
-    hsync_back_porch: 2
-    hsync_front_porch: 2
-    hsync_pulse_width: 2
-    vsync_back_porch: 2
-    vsync_front_porch: 2
+    # These back/front porch settings came from the waveshare demo sourcecode, they appear to be correct
+    hsync_back_porch: 10
+    hsync_front_porch: 50
+    hsync_pulse_width: 8
+    vsync_back_porch: 18
+    vsync_front_porch: 8
     vsync_pulse_width: 2
     init_sequence:
       - [ 0xFF, 0x77, 0x01, 0x00, 0x00, 0x13 ]
@@ -336,10 +343,10 @@ time:
     id: sntp_time
     timezone: America/Chicago
     servers:
-     - 0.pool.ntp.org
-     - 1.pool.ntp.org
-     - 2.pool.ntp.org
-    on_time_sync: 
+      - 0.pool.ntp.org
+      - 1.pool.ntp.org
+      - 2.pool.ntp.org
+    on_time_sync:
       then:
         - logger.log: "SNTP: time has synchronized"
 
@@ -348,6 +355,7 @@ sensor:
     i2c_id: i2c_bus
     address: 0x6B
     update_interval: 5s
+    accel_output_data_rate: 500
     accel_x:
       name: "QMI8658 Accelerometer X"
       id: accel_x

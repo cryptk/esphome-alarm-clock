@@ -41,10 +41,10 @@ image:
     resize: 100x100
     type: RGB565
     transparency: alpha_channel
-#   - id: clockface_analog
-#     file: "2.8_round_alarm_clock_packages/images/clockface_analog.png"
-#     type: binary
-#     resize: 200x200
+  - id: image_clockface_analog_background
+    file: "2.8_round_alarm_clock_packages/images/clockface_analog.png"
+    type: RGB565
+    resize: 480x480
 #   - id: clockface_seven_segment
 #     file: "2.8_round_alarm_clock_packages/images/clockface_seven_segment.png"
 #     type: binary

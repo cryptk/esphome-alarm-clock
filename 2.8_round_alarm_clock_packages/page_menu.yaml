@@ -3,7 +3,6 @@ lvgl:
   pages:
     - id: menu
       styles: page_background
-      pad_all: 100
       on_swipe_up:
         - script.execute:
             id: render_time_display
@@ -13,33 +12,41 @@ lvgl:
             animation: OUT_TOP
             time: ${animation_speed}
       widgets:
-        - line:
-            points:
-              - 140, 90
-              - 140, 190
-            line_width: 1
-            line_color: secondary_color
-        - line:
-            points:
-              - 140, 115
-              - 140, 165
-            line_width: 3
-            line_color: secondary_color
-        - line:
-            points:
-              - 90, 140
-              - 190, 140
-            line_width: 1
-            line_color: secondary_color
-        - line:
-            points:
-              - 115, 140
-              - 165, 140
-            line_width: 3
-            line_color: secondary_color
-        - buttonmatrix:
+        - obj:
+            align: CENTER
             width: 100%
             height: 100%
+            pad_all: 0
+            border_width: 0
+            widgets:
+              - line:
+                  points:
+                    - 240, 190
+                    - 240, 290
+                  line_width: 1
+                  line_color: secondary_color
+              - line:
+                  points:
+                    - 240, 215
+                    - 240, 265
+                  line_width: 3
+                  line_color: secondary_color
+              - line:
+                  points:
+                    - 190, 240
+                    - 290, 240
+                  line_width: 1
+                  line_color: secondary_color
+              - line:
+                  points:
+                    - 215, 240
+                    - 265, 240
+                  line_width: 3
+                  line_color: secondary_color
+        - buttonmatrix:
+            width: 200
+            height: 200
+            align: CENTER
             bg_opa: TRANSP
             border_side: NONE
             items:

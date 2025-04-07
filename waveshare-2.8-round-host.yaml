@@ -2,7 +2,6 @@ substitutions:
   name: alarm-clock-prototype-host
   friendly_name: Alarm Clock Prototype Host
   page_change_animation: FADE_IN
-  # page_change_animation: OVER_RIGHT
   animation_speed: 500ms
 
 packages:
@@ -15,7 +14,16 @@ packages:
   page_clockface: !include 2.8_round_alarm_clock_packages/page_clockface.yaml # Make sure the clockface page is included first so that it will be the first page displayed
   page_configuration: !include 2.8_round_alarm_clock_packages/page_configuration.yaml
   page_menu: !include 2.8_round_alarm_clock_packages/page_menu.yaml
-  alarm: !include 2.8_round_alarm_clock_packages/alarm.yaml
+# alarm_one: !include
+#   file: 2.8_round_alarm_clock_packages/alarm.yaml
+#   vars:
+#     name: alarm_one
+#     friendly_name: Alarm One
+# alarm_two: !include
+#   file: 2.8_round_alarm_clock_packages/alarm.yaml
+#   vars:
+#     name: alarm_two
+#     friendly_name: Alarm Two
 
 host:
 
@@ -24,31 +32,24 @@ logger:
   # level: VERY_VERBOSE
 
 # esphome:
-#   on_boot: 
+#   on_boot:
 #     - priority: -200
 #       then:
-#         lvgl.page.show: configuration
-      
+#         lvgl.page.show: menu
 
 # Write preferences to flash a little more frequently
 preferences:
   flash_write_interval: 15s
 
-# external_components:
-#   # - source: github://pr#8494
-#   #   components: [lvgl]
-#   - source:
-#       type: git
-#       url: file:///home/cryptk/Documents/sourcecode/esphome/git
-#       ref: lvgl_double_buffering
-#     components: [lvgl]
+external_components:
+  - source: github://pr#8494
+    components: [lvgl]
 
 touchscreen:
   platform: sdl
 
 display:
   - platform: sdl
-    show_test_card: true
     dimensions:
       width: 480
       height: 480
@@ -57,6 +58,9 @@ time:
   - platform: host
     id: sntp_time
     timezone: America/Chicago
+    on_time_sync:
+      then:
+        - logger.log: "SNTP: time has synchronized"
 
 lvgl:
   id: lvgl_main

@@ -19,9 +19,11 @@ DEPENDENCIES = ["i2c"]
 CONF_ACCEL_X = "accel_x"
 CONF_ACCEL_Y = "accel_y"
 CONF_ACCEL_Z = "accel_z"
+CONF_ACCEL_ODR = "accel_output_data_rate"
 CONF_GYRO_X = "gyro_x"
 CONF_GYRO_Y = "gyro_y"
 CONF_GYRO_Z = "gyro_z"
+CONF_GYRO_ODR = "gyro_output_data_rate"
 
 qmi8658_ns = cg.esphome_ns.namespace('qmi8658')
 QMI8658Component = qmi8658_ns.class_(
@@ -47,6 +49,8 @@ temperature_schema = sensor.sensor_schema(
     state_class=STATE_CLASS_MEASUREMENT,
 )
 
+ACCEL_OUTPUT_DATA_RATE_OPTIONS = {1000, 500, 250, 125, 63, 31}
+
 CONFIG_SCHEMA = cv.Schema(
     cv.Schema(
         {
@@ -57,6 +61,9 @@ CONFIG_SCHEMA = cv.Schema(
             cv.Optional(CONF_GYRO_X): gyro_schema,
             cv.Optional(CONF_GYRO_Y): gyro_schema,
             cv.Optional(CONF_GYRO_Z): gyro_schema,
+            cv.Optional(CONF_ACCEL_ODR, default=500): cv.one_of(
+                *ACCEL_OUTPUT_DATA_RATE_OPTIONS
+            ),
             cv.Optional(CONF_TEMPERATURE): temperature_schema,
         }
     )
@@ -83,3 +90,5 @@ async def to_code(config):
         if CONF_TEMPERATURE in config:
             sens = await sensor.new_sensor(config[CONF_TEMPERATURE])
             cg.add(var.set_temperature_sensor(sens))
+
+    cg.add(var.set_accel_output_data_rate(config[CONF_ACCEL_ODR]))

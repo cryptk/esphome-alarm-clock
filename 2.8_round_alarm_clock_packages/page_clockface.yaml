@@ -1,13 +1,10 @@
 lvgl:
   id: lvgl_main
-  # disp_bg_color: 0x000000
-  # disp_bg_opa: COVER
   pages:
     # The clockface page is extended in the various clockface_*.yaml files
     - id: clockface
       styles: page_background
       on_swipe_down:
-        
         - lvgl.page.show:
             id: menu
             animation: OVER_BOTTOM
