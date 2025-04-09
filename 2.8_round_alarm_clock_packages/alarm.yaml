@@ -169,13 +169,9 @@ lvgl:
             text_font: font_large
             align: CENTER
             y: -150
-        - label:
-            text: ":"
-            text_font: font_xxlarge
-            align: CENTER
-            y: -5
         - obj:
             align: center
+            y: -5
             width: 170
             height: 35
             bg_color: 0x444444
@@ -183,6 +179,7 @@ lvgl:
             radius: 100
         - obj:
             align: center
+            y: -5
             width: 180
             height: 40
             bg_color: 0x444444
@@ -190,6 +187,7 @@ lvgl:
             radius: 100
         - obj:
             align: center
+            y: -5
             width: 190
             height: 45
             bg_color: 0x444444
@@ -197,6 +195,7 @@ lvgl:
             radius: 100
         - obj:
             align: center
+            y: -5
             width: 200
             height: 50
             bg_color: 0x444444
@@ -205,10 +204,9 @@ lvgl:
         - button:
             align: CENTER
             x: 200
-            width: 100
-            height: 100
+            width: SIZE_CONTENT
+            height: SIZE_CONTENT
             bg_opa: TRANSP
-            border_side: NONE
             shadow_width: 0
             widgets:
               - label:
@@ -224,10 +222,9 @@ lvgl:
         - button:
             align: CENTER
             x: -200
-            width: 100
-            height: 100
+            width: SIZE_CONTENT
+            height: SIZE_CONTENT
             bg_opa: TRANSP
-            border_side: NONE
             shadow_width: 0
             widgets:
               - label:
@@ -258,6 +255,11 @@ lvgl:
               - number.set:
                   id: ${name}_number_hour
                   value: !lambda 'return std::stoi(text);'
+        - label:
+            text: ":"
+            text_font: font_xxlarge
+            align: CENTER
+            y: -8
         - roller:
             id: ${name}_ui_roller_minute
             anim_time: 250ms

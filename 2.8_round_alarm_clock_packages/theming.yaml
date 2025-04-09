@@ -52,19 +52,22 @@ lvgl:
 
   style_definitions:
     - id: page_background
-      # bg_opa: TRANSP
       bg_color: background_color
     - id: theme_roller_time
       bg_opa: TRANSP
       text_color: primary_color
-      # text_font: font_xxlarge
+      text_font: font_xlarge
       border_side: NONE
     - id: theme_roller_time_selected
       text_color: text_color
-      # text_font: font_xxlarge
-      # pad_top: 20
-      # pad_bottom: 20
+      text_font: font_xxlarge
       bg_opa: TRANSP
+    - id: show_boundary
+      # This is a helper style used during development to show the boundaries of widgets
+      border_color: 0xFF0000
+      border_width: 1
+      border_opa: COVER
+      border_side: [TOP,BOTTOM,LEFT,RIGHT]
 
 
 color:
@@ -93,7 +96,3 @@ image:
     file: "2.8_round_alarm_clock_packages/images/clockface_analog.png"
     type: RGB565
     resize: 480x480
-#   - id: clockface_seven_segment
-#     file: "2.8_round_alarm_clock_packages/images/clockface_seven_segment.png"
-#     type: binary
-#     resize: 200x200

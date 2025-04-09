@@ -11,4 +11,11 @@ https://github.com/esphome/esphome/blob/dev/esphome/components/mpu6050/mpu6050.c
 https://github.com/esphome/esphome/blob/dev/esphome/components/i2c/i2c.h
 https://www.qstcorp.com/upload/pdf/202301/13-52-25%20QMI8658A%20Datasheet%20Rev%20A.pdf
 
-Change alarm configuration page to use buttons that support checking (sticking on/off) for DOW selection and enablement.  Might clean things up a little.
+Have the screen auto-return to the clockface after X minutes of inactivity
+Build a configuration page:
+    - set timezone
+    - set screen brightness
+    - set nighttime screen brightness
+    - set times to use nighttime screen brightness
+
+Look into leveraging code from https://github.com/jdlambert/micro_tz_db to allow for friendly changing of timezones

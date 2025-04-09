@@ -46,6 +46,7 @@ logger:
 #   on_boot:
 #     - priority: -200
 #       then:
+#         # This is useful to force a specific page to show when working on the UI
 #         lvgl.page.show: alarm_configuration_alarm_one
 
 # Write preferences to flash a little more frequently
@@ -75,7 +76,6 @@ time:
 
 lvgl:
   id: lvgl_main
-  log_level: VERBOSE
   # top_layer:
   #   widgets:
   #     - obj:

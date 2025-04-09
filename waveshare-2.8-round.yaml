@@ -3,6 +3,7 @@ substitutions:
   friendly_name: Alarm Clock Round Touch Prototype
   animation_speed: 500ms
   number_of_timers: "5"
+  timezone: America/Chicago
 
 packages:
   platform_mixins_device: !include 2.8_round_alarm_clock_packages/platform-mixins-device.yaml
@@ -61,8 +62,6 @@ esp32:
     advanced:
       enable_idf_experimental_features: yes
     sdkconfig_options:
-      CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: y
-      CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240: y
       CONFIG_ESPTOOLPY_FLASHMODE_QIO: y
       CONFIG_FLASHMODE_QIO: y
       CONFIG_ESP32S3_DATA_CACHE_64KB: y
@@ -88,10 +87,6 @@ external_components:
     # This change implements the restore_value parameter on LVGL platform select entities
     components: [lvgl]
     refresh: 1h
-  - source: github://pr#8519  # TODO: This has been merged and will be present in esphome > 2025.3.  Remove this on next release
-    # This PR enables 120MHz HBM mode for octal psram
-    components: [esp32, psram]
-    refresh: 1h
   - source: github://cryptk/esphome_sd_card
     components: [sd_mmc_card]
     refresh: 1h
@@ -101,14 +96,8 @@ external_components:
     components: [qmi8658]
 
 logger:
-  # level: WARN
-  # level: VERY_VERBOSE
 
 psram:
-  # Supposedly octal mode does not work at 120MHz
-  # My testing shows otherwise, but it's not a huge difference in performance
-  # More testing needed, especially to validate stability
-  # https://github.com/esphome/esphome/pull/8477
   mode: octal
   speed: 120MHz
 
@@ -383,7 +372,7 @@ time:
     address: 0x51
   - platform: sntp
     id: sntp_time
-    timezone: America/Chicago
+    timezone: ${timezone}
     servers:
       - 0.pool.ntp.org
       - 1.pool.ntp.org
