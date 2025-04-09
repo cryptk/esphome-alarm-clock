@@ -1,3 +1,6 @@
+# TODO:
+# - Make a higher resolution meter for the minute hand, maybe 4 ticks per minute, so we can get some smoother motion out of it similar to the hour hand.
+
 # esphome:
 #   on_boot:
 #     - priority: -100
@@ -42,7 +45,8 @@ script:
                 // be rendered on the same LVGL update loop.
                 auto my_time = id(sntp_time).now();
                 lv_meter_set_indicator_value(id(clockface_analog), id(minute_hand), my_time.minute);
-                lv_meter_set_indicator_value(id(clockface_analog), id(hour_hand), my_time.hour);
+                auto hour_pos = std::fmod(my_time.hour, 12) * 60 + my_time.minute;
+                lv_meter_set_indicator_value(id(clockface_analog), id(hour_hand), hour_pos);
                 if(id(switch_show_seconds).state) {
                   lv_meter_set_indicator_value(id(clockface_analog), id(second_hand), my_time.second);
                 }

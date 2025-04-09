@@ -14,16 +14,27 @@ packages:
   page_clockface: !include 2.8_round_alarm_clock_packages/page_clockface.yaml # Make sure the clockface page is included first so that it will be the first page displayed
   page_configuration: !include 2.8_round_alarm_clock_packages/page_configuration.yaml
   page_menu: !include 2.8_round_alarm_clock_packages/page_menu.yaml
-# alarm_one: !include
-#   file: 2.8_round_alarm_clock_packages/alarm.yaml
-#   vars:
-#     name: alarm_one
-#     friendly_name: Alarm One
-# alarm_two: !include
-#   file: 2.8_round_alarm_clock_packages/alarm.yaml
-#   vars:
-#     name: alarm_two
-#     friendly_name: Alarm Two
+  alarm_one: !include
+    file: 2.8_round_alarm_clock_packages/alarm.yaml
+    vars:
+      name: alarm_one
+      friendly_name: Alarm One
+      next_alarm: alarm_configuration_alarm_two
+      prev_alarm: alarm_configuration_alarm_three
+  alarm_two: !include
+    file: 2.8_round_alarm_clock_packages/alarm.yaml
+    vars:
+      name: alarm_two
+      friendly_name: Alarm Two
+      next_alarm: alarm_configuration_alarm_three
+      prev_alarm: alarm_configuration_alarm_one
+  alarm_three: !include
+    file: 2.8_round_alarm_clock_packages/alarm.yaml
+    vars:
+      name: alarm_three
+      friendly_name: Alarm Three
+      next_alarm: alarm_configuration_alarm_one
+      prev_alarm: alarm_configuration_alarm_two
 
 host:
 
@@ -35,7 +46,7 @@ logger:
 #   on_boot:
 #     - priority: -200
 #       then:
-#         lvgl.page.show: menu
+#         lvgl.page.show: alarm_configuration_alarm_one
 
 # Write preferences to flash a little more frequently
 preferences:
@@ -65,3 +76,15 @@ time:
 lvgl:
   id: lvgl_main
   log_level: VERBOSE
+  # top_layer:
+  #   widgets:
+  #     - obj:
+  #         id: device_screen_area
+  #         align: CENTER
+  #         width: 100%
+  #         height: 100%
+  #         border_color: 0xFF0000
+  #         border_side: [TOP,BOTTOM,LEFT,RIGHT]
+  #         border_width: 1
+  #         border_opa: 50%
+  #         radius: 240

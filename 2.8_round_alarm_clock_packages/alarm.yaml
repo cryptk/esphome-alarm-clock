@@ -4,155 +4,348 @@
 # - Maybe replace this with a custom component to clean things up
 # - Ensure that skipped alarms (I.E: Daylight Savings) will still go off
 
-web_server:
-  id: my_web_server
-  sorting_groups:
-    - id: ${name}_settings
-      name: ${friendly_name} Settings
+esphome:
+  on_boot:
+    - priority: -200
+      then:
+        - number.set:
+            id: ${name}_number_hour
+            value: !lambda 'return id(${name}_global_hour);'
+        - number.set:
+            id: ${name}_number_minute
+            value: !lambda 'return id(${name}_global_minute);'
+
+globals:
+  - id: ${name}_global_hour
+    type: int
+    restore_value: yes
+    initial_value: "7"
+  - id: ${name}_global_minute
+    type: int
+    restore_value: yes
+    initial_value: "0"
 
 number:
-  - platform: template
-    id: ${name}_hours
-    name: "${friendly_name} Hours"
-    optimistic: true
+  - id: ${name}_number_hour
+    platform: template
+    name: ${friendly_name} Hour
     min_value: 0
     max_value: 23
-    step: 1
-    restore_value: true
-    initial_value: 7
-    web_server:
-      sorting_group_id: ${name}_settings
-      sorting_weight: 20
-  - platform: template
-    id: ${name}_minutes
-    name: "${friendly_name} Minutes"
+    step: 1.0
     optimistic: true
-    min_value: 0
+    set_action:
+      - globals.set:
+          id: ${name}_global_hour
+          value: !lambda 'return x;'
+      - lvgl.roller.update:
+          id: ${name}_ui_roller_hour
+          animated: true
+          selected_index: !lambda "return x;"
+  - id: ${name}_number_minute
+    platform: template
+    name: ${friendly_name} Minute
+    min_value: 00
     max_value: 59
-    step: 1
-    restore_value: true
-    initial_value: 0
-    web_server:
-      sorting_group_id: ${name}_settings
-      sorting_weight: 30
+    step: 1.0
+    optimistic: true
+    set_action:
+      - globals.set:
+          id: ${name}_global_minute
+          value: !lambda "return x;"
+      - lvgl.roller.update:
+          id: ${name}_ui_roller_minute
+          animated: true
+          selected_index: !lambda "return x;"
 
 switch:
-  - platform: template
-    id: ${name}_enabled
+  - id: ${name}_switch_enabled
+    platform: lvgl
     name: "${friendly_name} Enabled"
-    optimistic: true
+    widget: ${name}_ui_enable
     restore_mode: RESTORE_DEFAULT_OFF
-    web_server:
-      sorting_group_id: ${name}_settings
-      sorting_weight: 10
-  - platform: template
-    id: ${name}_monday
-    name: "${friendly_name} Monday"
-    optimistic: true
-    restore_mode: RESTORE_DEFAULT_ON
-    web_server:
-      sorting_group_id: ${name}_settings
-      sorting_weight: 40
-  - platform: template
-    id: ${name}_tuesday
-    name: "${friendly_name} Tuesday"
-    optimistic: true
-    restore_mode: RESTORE_DEFAULT_ON
-    web_server:
-      sorting_group_id: ${name}_settings
-      sorting_weight: 50
-  - platform: template
-    id: ${name}_wednesday
-    name: "${friendly_name} Wednesday"
-    optimistic: true
-    restore_mode: RESTORE_DEFAULT_ON
-    web_server:
-      sorting_group_id: ${name}_settings
-      sorting_weight: 60
-  - platform: template
-    id: ${name}_thursday
-    name: "${friendly_name} Thursday"
-    optimistic: true
-    restore_mode: RESTORE_DEFAULT_ON
-    web_server:
-      sorting_group_id: ${name}_settings
-      sorting_weight: 70
-  - platform: template
-    id: ${name}_friday
-    name: "${friendly_name} Friday"
-    optimistic: true
-    restore_mode: RESTORE_DEFAULT_ON
-    web_server:
-      sorting_group_id: ${name}_settings
-      sorting_weight: 80
-  - platform: template
-    id: ${name}_saturday
-    name: "${friendly_name} Saturday"
-    optimistic: true
-    restore_mode: RESTORE_DEFAULT_ON
-    web_server:
-      sorting_group_id: ${name}_settings
-      sorting_weight: 90
-  - platform: template
-    id: ${name}_sunday
+  - id: ${name}_switch_sunday
+    platform: lvgl
+    widget: ${name}_ui_sunday
     name: "${friendly_name} Sunday"
-    optimistic: true
     restore_mode: RESTORE_DEFAULT_ON
-    web_server:
-      sorting_group_id: ${name}_settings
-      sorting_weight: 100
+  - id: ${name}_switch_monday
+    platform: lvgl
+    widget: ${name}_ui_monday
+    name: "${friendly_name} Monday"
+    restore_mode: RESTORE_DEFAULT_ON
+  - id: ${name}_switch_tuesday
+    platform: lvgl
+    widget: ${name}_ui_tuesday
+    name: "${friendly_name} Tuesday"
+    restore_mode: RESTORE_DEFAULT_ON
+  - id: ${name}_switch_wednesday
+    platform: lvgl
+    widget: ${name}_ui_wednesday
+    name: "${friendly_name} Wednesday"
+    restore_mode: RESTORE_DEFAULT_ON
+  - id: ${name}_switch_thursday
+    platform: lvgl
+    widget: ${name}_ui_thursday
+    name: "${friendly_name} Thursday"
+    restore_mode: RESTORE_DEFAULT_ON
+  - id: ${name}_switch_friday
+    platform: lvgl
+    widget: ${name}_ui_friday
+    name: "${friendly_name} Friday"
+    restore_mode: RESTORE_DEFAULT_ON
+  - id: ${name}_switch_saturday
+    platform: lvgl
+    widget: ${name}_ui_saturday
+    name: "${friendly_name} Saturday"
+    restore_mode: RESTORE_DEFAULT_ON
 
 script:
-  - id: trigger_alarm_${name}
+  - id: ${name}_script_trigger
     then:
       - logger.log: "Alarm for ${friendly_name} has triggered!"
+      - switch.turn_on: buzzer
+      - delay: 250ms
+      - switch.turn_off: buzzer
 
-  - id: check_alarm_${name}
+  - id: ${name}_script_check
     then:
-      - logger.log:
-          format: "Checking if alarm ${friendly_name} needs to fire. hours: %d, minutes: %d, dow: %d"
-          args:
-            [
-              "id(sntp_time).now().hour",
-              "id(sntp_time).now().minute",
-              "id(sntp_time).now().day_of_week",
-            ]
       - if:
           condition:
             # Is the alarm enabled
-            - switch.is_on: ${name}_enabled
+            - switch.is_on: ${name}_switch_enabled
             # is it the right hour of the day
             - lambda: |-
-                return id(${name}_hours).state == id(sntp_time).now().hour;
+                return id(${name}_number_hour).state == id(sntp_time).now().hour;
             # is it the right minute of the day
             - lambda: |-
-                return id(${name}_minutes).state == id(sntp_time).now().minute;
+                return id(${name}_number_minute).state == id(sntp_time).now().minute;
             #is it the right day of the week
             - lambda: |-
                 auto dow = id(sntp_time).now().day_of_week;
                 switch (dow) {
                   case 1:
-                    return id(${name}_monday).state;
+                    return id(${name}_switch_monday).state;
                     break;
                   case 2:
-                    return id(${name}_tuesday).state;
+                    return id(${name}_switch_tuesday).state;
                     break;
                   case 3:
-                    return id(${name}_wednesday).state;
+                    return id(${name}_switch_wednesday).state;
                     break;
                   case 4:
-                    return id(${name}_thursday).state;
+                    return id(${name}_switch_thursday).state;
                     break;
                   case 5:
-                    return id(${name}_friday).state;
+                    return id(${name}_switch_friday).state;
                     break;
                   case 6:
-                    return id(${name}_saturday).state;
+                    return id(${name}_switch_saturday).state;
                     break;
                   case 7:
-                    return id(${name}_sunday).state;
+                    return id(${name}_switch_sunday).state;
                     break;
                 }
                 return false;
           then:
-            script.execute: trigger_alarm_${name}
+            script.execute: ${name}_script_trigger
+
+lvgl:
+  id: lvgl_main
+  pages:
+    - id: alarm_configuration_${name}
+      styles: page_background
+      on_swipe_up:
+        - script.execute:
+            id: render_time_display
+            full: true
+        - lvgl.page.show:
+            id: clockface
+            animation: OUT_TOP
+            time: ${animation_speed}
+      widgets:
+        - label:
+            id: ${name}_ui_name_label
+            text: ${friendly_name}
+            text_font: font_large
+            align: CENTER
+            y: -150
+        - label:
+            text: ":"
+            text_font: font_xxlarge
+            align: CENTER
+            y: -5
+        - obj:
+            align: center
+            width: 170
+            height: 35
+            bg_color: 0x444444
+            bg_opa: 15%
+            radius: 100
+        - obj:
+            align: center
+            width: 180
+            height: 40
+            bg_color: 0x444444
+            bg_opa: 15%
+            radius: 100
+        - obj:
+            align: center
+            width: 190
+            height: 45
+            bg_color: 0x444444
+            bg_opa: 15%
+            radius: 100
+        - obj:
+            align: center
+            width: 200
+            height: 50
+            bg_color: 0x444444
+            bg_opa: 15%
+            radius: 100
+        - button:
+            align: CENTER
+            x: 200
+            width: 100
+            height: 100
+            bg_opa: TRANSP
+            border_side: NONE
+            shadow_width: 0
+            widgets:
+              - label:
+                  align: center
+                  text: "\uF054"
+                  text_font: montserrat_40
+                  text_color: text_color
+            on_press:
+              - lvgl.page.show:
+                  id: ${next_alarm}
+                  animation: MOVE_LEFT
+                  time: ${animation_speed}
+        - button:
+            align: CENTER
+            x: -200
+            width: 100
+            height: 100
+            bg_opa: TRANSP
+            border_side: NONE
+            shadow_width: 0
+            widgets:
+              - label:
+                  align: center
+                  text: "\uF053"
+                  text_font: montserrat_40
+                  text_color: text_color
+            on_press:
+              - lvgl.page.show:
+                  id: ${prev_alarm}
+                  animation: MOVE_RIGHT
+                  time: ${animation_speed}
+        - roller:
+            id: ${name}_ui_roller_hour
+            anim_time: 250ms
+            styles: theme_roller_time
+            align: CENTER
+            x: -50
+            visible_row_count: 3
+            gesture_bubble: false
+            selected:
+              styles: theme_roller_time_selected
+            options: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+            on_change:
+              - logger.log:
+                  format: "Roller changed: %s"
+                  args: [text.c_str()]
+              - number.set:
+                  id: ${name}_number_hour
+                  value: !lambda 'return std::stoi(text);'
+        - roller:
+            id: ${name}_ui_roller_minute
+            anim_time: 250ms
+            styles: theme_roller_time
+            align: CENTER
+            x: 50
+            visible_row_count: 3
+            gesture_bubble: false
+            selected:
+              styles: theme_roller_time_selected
+            options: ["00","01","02","03","04","05","06","07","08","09",10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59]
+            on_change:
+              - number.set:
+                  id: ${name}_number_minute
+                  value: !lambda 'return std::stoi(text);'
+        - buttonmatrix:
+            align: center
+            y: 125
+            height: 75
+            width: 350
+            bg_opa: TRANSP
+            border_side: NONE
+            items:
+              bg_color: inactive_color
+              text_color: primary_color
+              checked:
+                bg_color: primary_color
+                text_color: text_color
+            rows:
+              - buttons:
+                - id: ${name}_ui_sunday
+                  text: "S"
+                  control:
+                    checkable: true
+                    no_repeat: true
+                - id: ${name}_ui_monday
+                  text: "M"
+                  control:
+                    checkable: true
+                    no_repeat: true
+                - id: ${name}_ui_tuesday
+                  text: "T"
+                  control:
+                    checkable: true
+                    no_repeat: true
+                - id: ${name}_ui_wednesday
+                  text: "W"
+                  control:
+                    checkable: true
+                    no_repeat: true
+                - id: ${name}_ui_thursday
+                  text: "T"
+                  control:
+                    checkable: true
+                    no_repeat: true
+                - id: ${name}_ui_friday
+                  text: "F"
+                  control:
+                    checkable: true
+                    no_repeat: true
+                - id: ${name}_ui_saturday
+                  text: "S"
+                  control:
+                    checkable: true
+                    no_repeat: true
+        - button:
+            id: ${name}_ui_enable
+            align: CENTER
+            x: 0
+            y: 200
+            checkable: true
+            bg_color: inactive_color
+            checked:
+              bg_color: primary_color
+            widgets:
+              - label:
+                  id: ${name}_ui_enable_label
+                  align: center
+                  text: "Enable"
+            on_value:
+              if:
+                condition:
+                  lambda: 'return x;'
+                then:
+                  - lvgl.label.update:
+                      id: ${name}_ui_enable_label
+                      text_color: text_color
+                else:
+                  - lvgl.label.update:
+                      id: ${name}_ui_enable_label
+                      text_color: primary_color

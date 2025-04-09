@@ -65,4 +65,9 @@ lvgl:
                         time: ${animation_speed}
                 - id: btn_alarms
                   text: "\uF0F3"
+                  on_value:
+                    - lvgl.page.show:
+                        id: alarm_configuration_alarm_one
+                        animation: OUT_TOP
+                        time: ${animation_speed}
               - buttons:

@@ -10,3 +10,5 @@ https://discord.com/channels/429907082951524364/1355311652458860624/135532130280
 https://github.com/esphome/esphome/blob/dev/esphome/components/mpu6050/mpu6050.cpp
 https://github.com/esphome/esphome/blob/dev/esphome/components/i2c/i2c.h
 https://www.qstcorp.com/upload/pdf/202301/13-52-25%20QMI8658A%20Datasheet%20Rev%20A.pdf
+
+Change alarm configuration page to use buttons that support checking (sticking on/off) for DOW selection and enablement.  Might clean things up a little.

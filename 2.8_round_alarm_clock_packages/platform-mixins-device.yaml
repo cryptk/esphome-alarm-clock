@@ -1,0 +1,12 @@
+### These extend some components to add web_server sorting/grouping. The web_server isn't supported in the host platform
+### so we can't just include it in the definition otherwise the host platform won't build.
+
+switch:
+  - id: !extend switch_show_seconds
+    web_server:
+      sorting_group_id: clockface_settings
+
+select:
+  - id: !extend select_clockface
+    web_server:
+      sorting_group_id: clockface_settings

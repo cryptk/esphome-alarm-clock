@@ -1,6 +1,7 @@
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
+  # min_version: 2025.4  # TODO: Uncomment this and set it to whatever version PR#8494 makes it into which should be 2025.4
   on_boot:
     - priority: -200 # LVGL runs with setup_priority::PROCESSOR which is 400.  We want to run this just after LVGL is initialized
       then:
@@ -20,6 +21,9 @@ interval:
           condition:
             time.has_time:
           then:
+            # - logger.log:
+            #     format: "Time tick: hour: %d, minute: %d, second: %d"
+            #     args: ['id(sntp_time).now().hour', 'id(sntp_time).now().minute', 'id(sntp_time).now().second']
             - script.execute: time_tick
 
 script:
@@ -38,12 +42,12 @@ script:
             lambda: "return id(sntp_time).now().second == 0;"
           then:
             - logger.log: "Running alarm check scripts"
-            # - script.execute: check_alarm_alarm_one
-            # - script.execute: check_alarm_alarm_two
+            - script.execute: alarm_one_script_check
+            - script.execute: alarm_two_script_check
 
 lvgl:
   id: lvgl_main
-  default_font: montserrat_24
+  default_font: font_default
   disp_bg_color: background_color
   disp_bg_opa: COVER
   buffer_size: 1.0

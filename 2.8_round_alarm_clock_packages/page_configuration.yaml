@@ -41,8 +41,6 @@ switch:
     widget: checkbox_time_display_seconds
     name: Show Seconds
     restore_mode: RESTORE_DEFAULT_OFF
-    web_server:
-      sorting_group_id: clockface_settings
     on_turn_on:
       - script.execute:
           id: toggle_show_seconds
@@ -57,8 +55,6 @@ select:
     name: "Clockface"
     id: select_clockface
     widget: dropdown_clockface
-    web_server:
-      sorting_group_id: clockface_settings
     restore_value: true
 
 lvgl:

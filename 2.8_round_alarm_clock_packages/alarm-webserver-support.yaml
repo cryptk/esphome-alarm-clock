@@ -1,0 +1,49 @@
+web_server:
+  id: !extend my_web_server
+  sorting_groups:
+    - id: ${name}_settings
+      name: ${friendly_name} Settings
+
+number:
+  - id: !extend ${name}_number_hour
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 20
+  - id: !extend ${name}_number_minute
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 30
+
+switch:
+  - id: !extend ${name}_switch_enabled
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 10
+  - id: !extend ${name}_switch_monday
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 40
+  - id: !extend ${name}_switch_tuesday
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 50
+  - id: !extend ${name}_switch_wednesday
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 60
+  - id: !extend ${name}_switch_thursday
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 70
+  - id: !extend ${name}_switch_friday
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 80
+  - id: !extend ${name}_switch_saturday
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 90
+  - id: !extend ${name}_switch_sunday
+    web_server:
+      sorting_group_id: ${name}_settings
+      sorting_weight: 100
