@@ -47,7 +47,7 @@ script:
 
 lvgl:
   id: lvgl_main
-  default_font: font_default
+  default_font: ${font_xlarge}
   disp_bg_color: background_color
   disp_bg_opa: COVER
   buffer_size: 1.0

@@ -166,12 +166,12 @@ lvgl:
         - label:
             id: ${name}_ui_name_label
             text: ${friendly_name}
-            text_font: font_large
+            text_font: ${font_xlarge}
             align: CENTER
-            y: -150
+            y: -175
         - obj:
             align: center
-            y: -5
+            y: -55
             width: 170
             height: 35
             bg_color: 0x444444
@@ -179,7 +179,7 @@ lvgl:
             radius: 100
         - obj:
             align: center
-            y: -5
+            y: -55
             width: 180
             height: 40
             bg_color: 0x444444
@@ -187,7 +187,7 @@ lvgl:
             radius: 100
         - obj:
             align: center
-            y: -5
+            y: -55
             width: 190
             height: 45
             bg_color: 0x444444
@@ -195,7 +195,7 @@ lvgl:
             radius: 100
         - obj:
             align: center
-            y: -5
+            y: -55
             width: 200
             height: 50
             bg_color: 0x444444
@@ -243,6 +243,7 @@ lvgl:
             styles: theme_roller_time
             align: CENTER
             x: -50
+            y: -50
             visible_row_count: 3
             gesture_bubble: false
             selected:
@@ -257,15 +258,16 @@ lvgl:
                   value: !lambda 'return std::stoi(text);'
         - label:
             text: ":"
-            text_font: font_xxlarge
+            text_font: ${font_xxlarge}
             align: CENTER
-            y: -8
+            y: -58
         - roller:
             id: ${name}_ui_roller_minute
             anim_time: 250ms
             styles: theme_roller_time
             align: CENTER
             x: 50
+            y: -50
             visible_row_count: 3
             gesture_bubble: false
             selected:
@@ -277,7 +279,7 @@ lvgl:
                   value: !lambda 'return std::stoi(text);'
         - buttonmatrix:
             align: center
-            y: 125
+            y: 90
             height: 75
             width: 350
             bg_opa: TRANSP
@@ -329,7 +331,7 @@ lvgl:
             id: ${name}_ui_enable
             align: CENTER
             x: 0
-            y: 200
+            y: 175
             checkable: true
             bg_color: inactive_color
             checked:

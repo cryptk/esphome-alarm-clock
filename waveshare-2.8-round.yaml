@@ -2,8 +2,11 @@ substitutions:
   name: alarm-clock-2-8-round-prototype
   friendly_name: Alarm Clock Round Touch Prototype
   animation_speed: 500ms
-  number_of_timers: "5"
   timezone: America/Chicago
+  font_default: montserrat_24
+  font_large: montserrat_30
+  font_xlarge: montserrat_36
+  font_xxlarge: montserrat_40
 
 packages:
   platform_mixins_device: !include 2.8_round_alarm_clock_packages/platform-mixins-device.yaml
@@ -23,7 +26,7 @@ packages:
       name: alarm_one
       friendly_name: Alarm One
       next_alarm: alarm_configuration_alarm_two
-      prev_alarm: alarm_configuration_alarm_three
+      prev_alarm: alarm_configuration_alarm_five
   alarm_one_webserver_support: !include
     file: 2.8_round_alarm_clock_packages/alarm-webserver-support.yaml
     vars:
@@ -46,13 +49,37 @@ packages:
     vars:
       name: alarm_three
       friendly_name: Alarm Three
-      next_alarm: alarm_configuration_alarm_one
+      next_alarm: alarm_configuration_alarm_four
       prev_alarm: alarm_configuration_alarm_two
   alarm_three_webserver_support: !include
     file: 2.8_round_alarm_clock_packages/alarm-webserver-support.yaml
     vars:
       name: alarm_three
       friendly_name: Alarm Three
+  alarm_four: !include
+    file: 2.8_round_alarm_clock_packages/alarm.yaml
+    vars:
+      name: alarm_four
+      friendly_name: Alarm Four
+      next_alarm: alarm_configuration_alarm_five
+      prev_alarm: alarm_configuration_alarm_three
+  alarm_four_webserver_support: !include
+    file: 2.8_round_alarm_clock_packages/alarm-webserver-support.yaml
+    vars:
+      name: alarm_four
+      friendly_name: Alarm Four
+  alarm_five: !include
+    file: 2.8_round_alarm_clock_packages/alarm.yaml
+    vars:
+      name: alarm_five
+      friendly_name: Alarm Five
+      next_alarm: alarm_configuration_alarm_one
+      prev_alarm: alarm_configuration_alarm_four
+  alarm_five_webserver_support: !include
+    file: 2.8_round_alarm_clock_packages/alarm-webserver-support.yaml
+    vars:
+      name: alarm_five
+      friendly_name: Alarm Five
 
 esp32:
   board: esp32-s3-devkitc-1

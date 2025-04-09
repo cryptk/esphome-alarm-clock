@@ -4,34 +4,6 @@ font:
     size: 100
     bpp: 4
     glyphs: "0123456789:"
-  - id: font_default
-    file: "gfonts://Montserrat"
-    size: 24
-    bpp: 4
-  - id: font_large
-    file: "gfonts://Montserrat"
-    size: 30
-    bpp: 4
-  - id: font_xlarge
-    file: "gfonts://Montserrat"
-    size: 35
-    bpp: 4
-  - id: font_xxlarge
-    file: "gfonts://Montserrat"
-    size: 40
-    bpp: 4
-  - file: 'fonts/mdi-7.4.47/materialdesignicons-webfont.ttf'
-    id: font_mdi_default
-    size: 24
-    bpp: 4
-    glyphs: [
-      "\U000F0E1E", # ckeckmark, for checkbox
-      ]
-    # glyphsets: [GF_Latin_Kernel]
-    # glyphs: ["\uF053","\uF054"]
-    # extras:
-    #   file: "gfonts://Montserrat"
-      # glyphs: ["\uF053","\uF054"]
 
 lvgl:
   id: !extend lgvl_main
@@ -56,11 +28,11 @@ lvgl:
     - id: theme_roller_time
       bg_opa: TRANSP
       text_color: primary_color
-      text_font: font_xlarge
+      text_font: ${font_xlarge}
       border_side: NONE
     - id: theme_roller_time_selected
       text_color: text_color
-      text_font: font_xxlarge
+      text_font: ${font_xxlarge}
       bg_opa: TRANSP
     - id: show_boundary
       # This is a helper style used during development to show the boundaries of widgets
