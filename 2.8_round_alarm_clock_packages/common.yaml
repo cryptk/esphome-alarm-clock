@@ -1,11 +1,10 @@
-esphome:
-  name: ${name}
-  friendly_name: ${friendly_name}
-  # min_version: 2025.4  # TODO: Uncomment this and set it to whatever version PR#8494 makes it into which should be 2025.4
-  on_boot:
-    - priority: -200 # LVGL runs with setup_priority::PROCESSOR which is 400.  We want to run this just after LVGL is initialized
-      then:
-        - script.execute: initialize_clock
+# esphome:
+#   # min_version: 2025.4  # TODO: Uncomment this and set it to whatever version PR#8494 makes it into which should be 2025.4
+#   on_boot:
+#     - priority: -200 # LVGL runs with setup_priority::PROCESSOR which is 400.  We want to run this just after LVGL is initialized
+#       then:
+#         - logger.log: "Beginning initialization"
+#         - script.execute: initialize_clock
 
 # Enable logging
 logger:
@@ -51,6 +50,8 @@ lvgl:
   disp_bg_color: background_color
   disp_bg_opa: COVER
   buffer_size: 1.0
+  # on_boot: # TODO: Enable this once we are on 2025.4.0b2 or newer without an lvgl external_component
+  #   - script.execute: initialize_clock
   # buffer_size: 0.12
   # buffer_size: 0.25
   top_layer:

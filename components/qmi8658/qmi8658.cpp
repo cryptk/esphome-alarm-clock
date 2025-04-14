@@ -8,95 +8,6 @@ namespace esphome
 
     static const char *const TAG = "qmi8658";
 
-    // Datasheet: https://www.qstcorp.com/upload/pdf/202301/13-52-25%20QMI8658A%20Datasheet%20Rev%20A.pdf
-
-    // General Purpose Registers
-    static constexpr uint8_t QMI8658_REG_WHO_AM_I = 0x00;    // Device Identifier
-    static constexpr uint8_t QMI8658_REG_REVISION_ID = 0x01; // Device Revision ID
-
-    // Setup and Control Registers
-    static constexpr uint8_t QMI8658_REG_CTRL1 = 0x02; // SPI Interface and Sensor Enable
-    static constexpr uint8_t QMI8658_REG_CTRL2 = 0x03; // Accelerometer: Output Data Rate, Full Scale, Self Test
-    static constexpr uint8_t QMI8658_REG_CTRL3 = 0x04; // Gyroscope: Output Data Rate, Full Scale, Self Test
-    static constexpr uint8_t QMI8658_REG_CTRL4 = 0x05; // Reserved
-    static constexpr uint8_t QMI8658_REG_CTRL5 = 0x06; // Low pass filter setting.
-    static constexpr uint8_t QMI8658_REG_CTRL6 = 0x07; // Reserved
-    static constexpr uint8_t QMI8658_REG_CTRL7 = 0x08; // Enable Sensors
-    static constexpr uint8_t QMI8658_REG_CTRL8 = 0x09; // Motion Detection Control
-    static constexpr uint8_t QMI8658_REG_CTRL9 = 0x0A; // Host Commands
-
-    // Host Controlled Calibration Registers (See CTRL9 in datasheet, Usage is Optional)
-    static constexpr uint8_t QMI8658_REG_CAL1_L = 0x0B; // Calibration Register 1 lower 8 bits
-    static constexpr uint8_t QMI8658_REG_CAL1_H = 0x0C; // Calibration Register 1 upper 8 bits
-    static constexpr uint8_t QMI8658_REG_CAL2_L = 0x0D; // Calibration Register 2 lower 8 bits
-    static constexpr uint8_t QMI8658_REG_CAL2_H = 0x0E; // Calibration Register 2 upper 8 bits
-    static constexpr uint8_t QMI8658_REG_CAL3_L = 0x0F; // Calibration Register 3 lower 8 bits
-    static constexpr uint8_t QMI8658_REG_CAL3_H = 0x10; // Calibration Register 3 upper 8 bits
-    static constexpr uint8_t QMI8658_REG_CAL4_L = 0x11; // Calibration Register 4 lower 8 bits
-    static constexpr uint8_t QMI8658_REG_CAL4_H = 0x12; // Calibration Register 4 upper 8 bits
-
-    // FIFO Registers
-    static constexpr uint8_t QMI8658_REG_FIFO_WTM_TH = 0x13;   // FIFO watermark level, in ODRs
-    static constexpr uint8_t QMI8658_REG_FIFO_CTRL = 0x14;     // FIFO Setup
-    static constexpr uint8_t QMI8658_REG_FIFO_SMPL_CNT = 0x15; // FIFO sample count LSBs
-    static constexpr uint8_t QMI8658_REG_FIFO_STATUS = 0x16;   // FIFO Status
-    static constexpr uint8_t QMI8658_REG_FIFO_DATA = 0x17;     // FIFO Data
-
-    // Status Registers
-    static constexpr uint8_t QMI8658_REG_STATUSINT = 0x2D; // Sensor Data Availability with the Locking mechanism, CmdDone (CTRL9 protocol bit).
-    static constexpr uint8_t QMI8658_REG_STATUS0 = 0x2E;   // Output Data Over Run and Data Availability.
-    static constexpr uint8_t QMI8658_REG_STATUS1 = 0x2F;   // Miscellaneous Status: Any Motion, No Motion, Significant Motion, Pedometer, Tap.
-
-    // Timestamp Register
-    static constexpr uint8_t QMI8658_REG_TIMESTAMP_LOW = 0x30;  // Timestamp Lower 8 bits
-    static constexpr uint8_t QMI8658_REG_TIMESTAMP_MID = 0x31;  // Timestamp middle 8 bits
-    static constexpr uint8_t QMI8658_REG_TIMESTAMP_HIGH = 0x32; // Timestamp upper 8 bits;
-
-    // Data Output Registers (16 bits 2’s Complement Except COD Sensor Data)
-    static constexpr uint8_t QMI8658_REG_TEMP_L = 0x33; // Temperature Output Data lower 8 bits
-    static constexpr uint8_t QMI8658_REG_TEMP_H = 0x34; // Temperature Output Data upper 8 bits
-
-    static constexpr uint8_t QMI8658_REG_AX_L = 0x35; // X-axis Acceleration lower 8 bits
-    static constexpr uint8_t QMI8658_REG_AX_H = 0x36; // X-axis Acceleration upper 8 bits
-    static constexpr uint8_t QMI8658_REG_AY_L = 0x37; // Y-axis Acceleration lower 8 bits
-    static constexpr uint8_t QMI8658_REG_AY_H = 0x38; // Y-axis Acceleration upper 8 bits
-    static constexpr uint8_t QMI8658_REG_AZ_L = 0x39; // Z-axis Acceleration lower 8 bits
-    static constexpr uint8_t QMI8658_REG_AZ_H = 0x3A; // Z-axis Acceleration upper 8 bits
-
-    static constexpr uint8_t QMI8658_REG_GX_L = 0x3B; // X-axis Angular Rate lower 8 bits
-    static constexpr uint8_t QMI8658_REG_GX_H = 0x3C; // X-axis Angular Rate upper 8 bits
-    static constexpr uint8_t QMI8658_REG_GY_L = 0x3D; // Y-axis Angular Rate lower 8 bits
-    static constexpr uint8_t QMI8658_REG_GY_H = 0x3E; // Y-axis Angular Rate upper 8 bits
-    static constexpr uint8_t QMI8658_REG_GZ_L = 0x3F; // Z-axis Angular Rate lower 8 bits
-    static constexpr uint8_t QMI8658_REG_GZ_H = 0x40; // Z-axis Angular Rate upper 8 bits
-
-    // COD Indication and General Purpose Registers
-    static constexpr uint8_t QMI8658_REG_COD_STATUS = 0x46; // Calibration-On-Demand status register
-
-    static constexpr uint8_t QMI8658_REG_dQW_L = 0x49; // General purpose register
-    static constexpr uint8_t QMI8658_REG_dQW_H = 0x4A; // General purpose register
-    static constexpr uint8_t QMI8658_REG_dQX_L = 0x4B; // General purpose register
-    static constexpr uint8_t QMI8658_REG_dQX_H = 0x4C; // Reserved
-    static constexpr uint8_t QMI8658_REG_dQY_L = 0x4D; // General purpose register
-    static constexpr uint8_t QMI8658_REG_dQY_H = 0x4E; // Reserved
-    static constexpr uint8_t QMI8658_REG_dQZ_L = 0x4F; // Reserved
-    static constexpr uint8_t QMI8658_REG_dQZ_H = 0x50; // Reserved
-
-    static constexpr uint8_t QMI8658_REG_dVX_L = 0x51; // General purpose register
-    static constexpr uint8_t QMI8658_REG_dVX_H = 0x52; // General purpose register
-    static constexpr uint8_t QMI8658_REG_dVY_L = 0x53; // General purpose register
-    static constexpr uint8_t QMI8658_REG_dVY_H = 0x54; // General purpose register
-    static constexpr uint8_t QMI8658_REG_dVZ_L = 0x55; // General purpose register
-    static constexpr uint8_t QMI8658_REG_dVZ_H = 0x56; // General purpose register
-
-    static constexpr uint8_t QMI8658_REG_TAP_STATUS = 0x59;    // Axis, direction, number of detected Tap
-    static constexpr uint8_t QMI8658_REG_STEP_CNT_LOW = 0x5A;  // Low byte of step count of Pedometer
-    static constexpr uint8_t QMI8658_REG_STEP_CNT_MIDL = 0x5B; // Middle byte of step count of Pedometer
-    static constexpr uint8_t QMI8658_REG_STEP_CNT_HIGH = 0x5C; // High byte of step count of Pedometer
-
-    // Reset Register
-    static constexpr uint8_t QMI8658_REG_RESET = 0x60; // Soft Reset Register
-
     typedef enum
     {
       ACC_SELF_TEST_DISENABLE = 0,
@@ -158,19 +69,278 @@ namespace esphome
     } qmi8658_gyro_odr_t;
     static constexpr uint8_t QMI8658_GYRO_OUTPUT_DATA_RATE_OFFSET = 0;
 
+    static constexpr uint8_t QMI8658_STATUS1_ANY_MOTION_MASK = 0x20;
+    static constexpr uint8_t QMI8658_STATUS1_NO_MOTION_MASK = 0x40;
+    static constexpr uint8_t QMI8658_STATUS1_SIGNIFICANT_MOTION_MASK = 0x80;
+
     // const float GRAVITY_EARTH = 9.80665f;
 
-    // Utility function to combine two unsigned 8-bit registers into a signed 16-bit value using twos compliment
-    int16_t combine_bytes(uint8_t low, uint8_t high)
+    void QMI8658Component::initialize_()
     {
-      return (int16_t)((high << 8) | low);
+      if (this->current_state_ == QMI8658_STATE_RESETTING) {
+        // If we are still resetting, we need to check if we are complete yet
+        uint8_t reset_status;
+        this->read_register(QMI8658_REG_dQY_L, &reset_status, 1);
+        if (reset_status != 0x80) {
+          // We have not completed reset yet, try again on next loop
+          return;
+        }
+        // We have successfully reset
+        this->current_state_ = QMI8658_STATE_RESET;
+      }
+
+      // Continue initialization
+
+      // Enable the internal 2MHz oscillator
+      this->ctrl1_register_ &= 0xFE; // ensure bit 1 is 0
+      // Enable automatic address incrementation for faster block reads
+      this->ctrl1_register_ |= 0x40; // ensure bit 6 is 1
+
+      // Set Acceleromenter Output Data Rate to 1000Hz
+      this->configure_accel_output_data_rate_();
+
+      // Set accelerometer to full-scale +/- 2g
+      uint8_t SET_ACCEL_SCALE = 0x03;
+      this->ctrl2_register_ |= SET_ACCEL_SCALE;
+
+      // Set Gyro Output Data Rate to 896.8Hz, Full-scale +/- 2048dps
+      uint8_t SET_GYRO_CONFIG = 0x73;
+      this->ctrl3_register_ |= SET_GYRO_CONFIG;
+
+      this->configure_motion_interrupts_();
+
+      // Set the flag to turn on the Accelerometer and Gyroscope
+      // Enable Accelerometer (bit 1) and Gyroscope (bit 2)
+      uint8_t SET_GYRO_ACCEL_ENABLE = 0x03;
+      this->ctrl7_register_ |= SET_GYRO_ACCEL_ENABLE;
+
+      // Enable Any, No and Significant Motion engines (this might need to be done after accelerometer is enabled)
+      this->ctrl8_register_ |= 0x0E;
+
+      ESP_LOGD(TAG, "Initialization complete");
+      this->current_state_ = QMI8658_STATE_ONLINE;
     }
 
-    void QMI8658Component::set_register_value(uint8_t register_address, uint8_t value, uint8_t offset)
+    void QMI8658Component::setup()
     {
+      ESP_LOGCONFIG(TAG, "Setting up QMI8658...");
+
+      // Ask the chip for an identifier.  0x05 means it's a QST sensor.
+      uint8_t who_am_i;
+      if (!this->read_byte(QMI8658_REG_WHO_AM_I, &who_am_i) || (who_am_i != 0x05))
+      {
+        this->mark_failed();
+        return;
+      }
+      uint8_t revision_id;
+      if (!this->read_byte(QMI8658_REG_REVISION_ID, &revision_id))
+      {
+        this->mark_failed();
+        return;
+      }
+      ESP_LOGCONFIG(TAG, "Device revision: %d", revision_id);
+
+      // Reset the QMI8658 so we start from a known state
+      this->reset_register_ |= 0xB0; // table 27 in datasheet
+      this->current_state_ = QMI8658_STATE_RESETTING;
+      // There is ~15ms of delay for the reset to complete, we will pick initialization back up on the next update() loop
     }
 
-    void QMI8658Component::configure_accel_output_data_rate()
+    void QMI8658Component::dump_config()
+    {
+      ESP_LOGCONFIG(TAG, "QMI8658:");
+      LOG_I2C_DEVICE(this);
+      if (this->is_failed())
+      {
+        ESP_LOGE(TAG, "Communication with QMI8658 failed!");
+      }
+      // LOG_UPDATE_INTERVAL(this);
+      LOG_SENSOR("  ", "Acceleration X", this->accel_x_sensor_);
+      LOG_SENSOR("  ", "Acceleration Y", this->accel_y_sensor_);
+      LOG_SENSOR("  ", "Acceleration Z", this->accel_z_sensor_);
+      LOG_SENSOR("  ", "Gyro X", this->gyro_x_sensor_);
+      LOG_SENSOR("  ", "Gyro Y", this->gyro_y_sensor_);
+      LOG_SENSOR("  ", "Gyro Z", this->gyro_z_sensor_);
+      LOG_SENSOR("  ", "Temperature", this->temperature_sensor_);
+      ESP_LOGCONFIG(TAG, "  Acceleration Output Data Rate: %d", this->accel_output_data_rate_);
+    }
+
+    void QMI8658Component::update()
+    {
+      // If we are not yet fully online...
+      if (this->current_state_ != QMI8658_STATE_ONLINE) {
+        // do not run, we will attempt to initialize in the loop()
+        return;
+      }
+
+      // if (this->interrupt1_pin_ != nullptr) {
+      //   handle_interrupt1_();
+      // }
+
+      // // if (this->interrupt2_pin_ != nullptr) {
+      // //   handle_interrupt2_();
+      // // }
+
+      // Read accelerometer values
+      float ax = this->read_accel_gyro_data_(QMI8658_REG_AX_L, QMI8658_REG_AX_H, 16384.0f);
+      float ay = this->read_accel_gyro_data_(QMI8658_REG_AY_L, QMI8658_REG_AY_H, 16384.0f);
+      float az = this->read_accel_gyro_data_(QMI8658_REG_AZ_L, QMI8658_REG_AZ_H, 16384.0f);
+
+      // Read gyroscope data
+      float gx = this->read_accel_gyro_data_(QMI8658_REG_GX_L, QMI8658_REG_GX_H, 16.0f);
+      float gy = this->read_accel_gyro_data_(QMI8658_REG_GY_L, QMI8658_REG_GY_H, 16.0f);
+      float gz = this->read_accel_gyro_data_(QMI8658_REG_GZ_L, QMI8658_REG_GZ_H, 16.0f);
+
+      // Publish accelerometer sensor values
+      if (this->accel_x_sensor_ != nullptr)
+        this->accel_x_sensor_->publish_state(ax);
+      if (this->accel_y_sensor_ != nullptr)
+        this->accel_y_sensor_->publish_state(ay);
+      if (this->accel_z_sensor_ != nullptr)
+        this->accel_z_sensor_->publish_state(az);
+
+      // Publish gyroscope sensor values
+      if (this->gyro_x_sensor_ != nullptr)
+        this->gyro_x_sensor_->publish_state(gx);
+      if (this->gyro_y_sensor_ != nullptr)
+        this->gyro_y_sensor_->publish_state(gy);
+      if (this->gyro_z_sensor_ != nullptr)
+        this->gyro_z_sensor_->publish_state(gz);
+      
+    }
+
+    void QMI8658Component::loop() {
+      // If we are not yet fully online...
+      if (this->current_state_ != QMI8658_STATE_ONLINE) {
+        // ...attempt to initialize
+        return this->initialize_();
+      }
+
+      if (this->interrupt1_pin_->digital_read()) {
+        // Pull the status1 register a single time so we can check the bits below
+        auto register_value = this->status1_register_.get();
+
+        if (this->no_motion_detected_sensor_ != nullptr) {
+          this->no_motion_detected_sensor_->publish_state(register_value & QMI8658_STATUS1_NO_MOTION_MASK);
+        }
+        if (this->any_motion_detected_sensor_ != nullptr) {
+          this->any_motion_detected_sensor_->publish_state(register_value & QMI8658_STATUS1_ANY_MOTION_MASK);
+        }
+        if (this->significant_motion_detected_sensor_ != nullptr) {
+          this->significant_motion_detected_sensor_->publish_state(register_value & QMI8658_STATUS1_SIGNIFICANT_MOTION_MASK);
+        }
+      }
+    }
+
+    float QMI8658Component::get_setup_priority() const { return setup_priority::DATA; }
+
+    void QMI8658Component::configure_motion_interrupts_() {
+      // TODO: This should be togglable and configurable functionality
+
+      // Determines how much motion there must be
+      // This is a difference in value between subsequent samples measured in units of 1/32nd of a g of acceleration
+      auto AnyMotionXThr = 0xF0;
+      auto AnyMotionYThr = 0xF0;
+      auto AnyMotionZThr = 0xF0;
+      // measured in number of samples based on the Accelerometer Output Data Rate
+      // 0x0A == 10
+      auto AnyMotionWindow = 0x0A;
+
+      auto NoMotionXThr = 0x80;
+      auto NoMotionYThr = 0x80;
+      auto NoMotionZThr = 0x80;
+      // measured in number of samples based on the Accelerometer Output Data Rate
+      // 0xC8 == 200
+      auto NoMotionWindow = 0xC8;
+
+      auto CTRL_CMD_CONFIGURE_MOTION = 0x0E;
+      // ESP_LOGD(TAG, "Register status: %d", this->cal1_l_register_.get());
+      // range 0-255, 0x80 == 128
+      // AnyMotionXThr
+      this->cal1_l_register_ = AnyMotionXThr;
+      // AnyMotionYThr
+      this->cal1_h_register_ = AnyMotionYThr;
+      // AnyMotionZThr
+      this->cal2_l_register_ = AnyMotionZThr;
+
+      // range 0-255, 0x40 == 64
+      // AnyMotionXThr
+      this->cal2_h_register_ = NoMotionXThr;
+      // AnyMotionYThr
+      this->cal3_l_register_ = NoMotionYThr;
+      // AnyMotionZThr
+      this->cal3_h_register_ = NoMotionZThr;
+
+      //MOTION_MODE_CTRL
+      // 0xF7 == NoMotion requires ALL axises to be still (AND), AnyMotion requires ANY axis to have motion (OR)
+      // 0xA2 == Enable No Motion and Any Motion on X-Axis only
+      this->cal4_l_register_ = 0xA2;
+
+      // Sending first configuration command
+      this->cal4_h_register_ = 0x01;
+
+      // Push config
+      this->ctrl9_register_ = CTRL_CMD_CONFIGURE_MOTION;
+
+      // AnyMotionWindow
+      // TODO: Validate that these registers are zeroed out after the CTRL_CMD_CONFIGURE_MOTION command above before writing to them again
+      // ESP_LOGD(TAG, "Register status: %d", this->cal1_l_register_.get());
+      this->cal1_l_register_ = AnyMotionWindow;
+
+      //NoMotionWindow
+      this->cal1_h_register_ = NoMotionWindow;
+
+      // SigMotionWaitWindow == 1000 samples
+      this->cal2_l_register_ = 0xE8;
+      this->cal2_h_register_ = 0x03;
+
+      // SigMotionConfirmWindow == 1500 samples
+      this->cal3_l_register_ = 0xDC;
+      this->cal3_h_register_ = 0x05;
+
+      // Sending second configuration command
+      this->cal4_h_register_ = 0x02;
+
+      // Push config
+      this->ctrl9_register_ = CTRL_CMD_CONFIGURE_MOTION;
+
+
+
+      // Set motion engine to use interrupt 1 pin
+      this->ctrl8_register_ |= 0x40;
+
+      // Enable Int1 pin
+      this->ctrl1_register_ = 0x08;
+      
+    }
+
+    // void QMI8658Component::handle_interrupt1_() {
+    //   // ESP_LOGD(TAG, "Handling Interrupt1 Pin");
+    //   bool int1_set = this->interrupt1_pin_->digital_read();
+    //   // ESP_LOGD(TAG, "Status of Int1: %d", int1_set);
+    //   auto register_value = this->status1_register_.get();
+    //   // ESP_LOGD(TAG, "Status of the status1 register: %X", register_value);
+    //   auto any_motion_detected = register_value & QMI8658_STATUS1_ANY_MOTION_MASK;
+    //   auto no_motion_detected = register_value & QMI8658_STATUS1_NO_MOTION_MASK;
+    //   auto sig_motion_detected = register_value & QMI8658_STATUS1_SIG_MOTION_MASK;
+    //   // ESP_LOGD(TAG, "Any Motion: %d; No Motion: %d; Sig Motion: %d", any_motion_detected>1, no_motion_detected>1, sig_motion_detected>1);
+    // }
+
+    // void QMI8658Component::handle_interrupt2_() {
+    //   // ESP_LOGD(TAG, "Handling Interrupt2 Pin");
+    //   bool int2_set = this->interrupt2_pin_->digital_read();
+    //   // ESP_LOGD(TAG, "Status of Int2: %d", int2_set);
+    // }
+
+    float QMI8658Component::read_accel_gyro_data_(const uint8_t lower_register, const uint8_t higher_register, float sensitivity) {
+      uint8_t data[2];
+      this->read_register(lower_register, &data[0], 1);
+      this->read_register(higher_register, &data[1], 1);
+      int16_t raw_value = (int16_t)((data[1] << 8) | data[0]);
+      return raw_value / sensitivity;
+    }
+
+    void QMI8658Component::configure_accel_output_data_rate_()
     {
       uint8_t data_rate_value;
       switch (this->accel_output_data_rate_)
@@ -195,138 +365,11 @@ namespace esphome
         break;
       }
 
+      // TODO: We should just return the value back to the caller and let them get a register with this->reg() and update it with a |= operation
       data_rate_value << QMI8658_ACC_OUTPUT_DATA_RATE_OFFSET;
-
-      ESP_LOGD(TAG, "Data rate value: %d", data_rate_value);
-
-      this->write_byte(QMI8658_REG_CTRL1, data_rate_value);
+      this->ctrl1_register_ |= data_rate_value;
+      // this->write_register(QMI8658_REG_CTRL1, &data_rate_value, 1);
     }
-
-    void QMI8658Component::setup()
-    {
-      ESP_LOGCONFIG(TAG, "Setting up QMI8658...");
-
-      // Ask the chip for an identifier.  0x05 means it's a QST sensor.
-      uint8_t who_am_i;
-      if (!this->read_byte(QMI8658_REG_WHO_AM_I, &who_am_i) || (who_am_i != 0x05))
-      {
-        this->mark_failed();
-        return;
-      }
-      uint8_t revision_id;
-      if (!this->read_byte(QMI8658_REG_REVISION_ID, &revision_id))
-      {
-        this->mark_failed();
-        return;
-      }
-      ESP_LOGCONFIG(TAG, "Device revision: %d", revision_id);
-
-      uint8_t ctrl1;
-      // Read the existing CTRL1 register
-      this->read_byte(QMI8658_REG_CTRL1, &ctrl1);
-      // Enable the internal 2MHz oscillator
-      ctrl1 &= 0xFE; // ensure bit 1 is 0
-      // Enable automatic address incrementation for faster block reads
-      ctrl1 |= 0x40; // ensure bit 6 is 1
-      this->write_byte(QMI8658_REG_CTRL1, ctrl1);
-
-      // Set Acceleromenter Output Data Rate to 1000Hz, full-scale +/- 2g
-      this->configure_accel_output_data_rate();
-      this->write_byte(QMI8658_REG_CTRL2, 0x03);
-      // Set Gyro Output Data Rate to 896.8Hz, Full-scale +/- 2048dps
-      this->write_byte(QMI8658_REG_CTRL3, 0x73);
-      // Enable Accelerometer (bit 1) and Gyroscope (bit 2)
-      this->write_byte(QMI8658_REG_CTRL7, 0x03);
-
-      // // Initialization code
-      // // Example: Disable all sensors initially
-      // this->write_byte(QMI8658_REG_CTRL7, 0x00);  // Assuming 0x00 disables all
-      // // Add other initialization routines here (e.g., setting up accelerometer/gyroscope ranges, etc.)
-      // // 0x4D can be overwritten later as it is also the QMI8658_REG_dQY_L register, so it shoudl be checked somewhat quickly
-    }
-
-    void QMI8658Component::dump_config()
-    {
-      ESP_LOGCONFIG(TAG, "QMI8658:");
-      LOG_I2C_DEVICE(this);
-      if (this->is_failed())
-      {
-        ESP_LOGE(TAG, "Communication with QMI8658 failed!");
-      }
-      LOG_UPDATE_INTERVAL(this);
-      LOG_SENSOR("  ", "Acceleration X", this->accel_x_sensor_);
-      LOG_SENSOR("  ", "Acceleration Y", this->accel_y_sensor_);
-      LOG_SENSOR("  ", "Acceleration Z", this->accel_z_sensor_);
-      LOG_SENSOR("  ", "Gyro X", this->gyro_x_sensor_);
-      LOG_SENSOR("  ", "Gyro Y", this->gyro_y_sensor_);
-      LOG_SENSOR("  ", "Gyro Z", this->gyro_z_sensor_);
-      LOG_SENSOR("  ", "Temperature", this->temperature_sensor_);
-      ESP_LOGCONFIG(TAG, "  Acceleration Output Data Rate: %d", this->accel_output_data_rate_);
-    }
-
-    void QMI8658Component::update()
-    {
-      // Read accelerometer and gyroscope data
-      uint16_t raw_data[12]; // 6 bytes for accelerometer, 6 bytes for gyroscope
-
-      uint8_t high_bits;
-      uint8_t low_bits;
-
-      // Read accelerometer data X
-      this->read_byte(QMI8658_REG_AX_L, &low_bits);
-      this->read_byte(QMI8658_REG_AX_H, &high_bits);
-      int16_t ax = combine_bytes(low_bits, high_bits);
-
-      // Read accelerometer data Y
-      this->read_byte(QMI8658_REG_AY_L, &low_bits);
-      this->read_byte(QMI8658_REG_AY_H, &high_bits);
-      int16_t ay = combine_bytes(low_bits, high_bits);
-
-      // Read accelerometer data Z
-      this->read_byte(QMI8658_REG_AZ_L, &low_bits);
-      this->read_byte(QMI8658_REG_AZ_H, &high_bits);
-      int16_t az = combine_bytes(low_bits, high_bits);
-
-      // Read gyroscope data (X, Y, Z)
-      this->read_byte(QMI8658_REG_GX_L, &low_bits);
-      this->read_byte(QMI8658_REG_GX_H, &high_bits);
-      int16_t gx = combine_bytes(low_bits, high_bits);
-
-      this->read_byte(QMI8658_REG_GY_L, &low_bits);
-      this->read_byte(QMI8658_REG_GY_H, &high_bits);
-      int16_t gy = combine_bytes(low_bits, high_bits);
-
-      this->read_byte(QMI8658_REG_GZ_L, &low_bits);
-      this->read_byte(QMI8658_REG_GZ_H, &high_bits);
-      int16_t gz = combine_bytes(low_bits, high_bits);
-
-      // Convert raw data to physical units (g's and dps) -  **Need sensitivity values from datasheet**
-      //  Example:  (replace with actual sensitivity values)
-      float ax_g = ax / 16384.0f; //  +/- 2g range (see Table 7 in datasheet)
-      float ay_g = ay / 16384.0f;
-      float az_g = az / 16384.0f;
-      float gx_dps = gx / 16.0f; // +/- 2048 dps range (see Table 8 in datasheet)
-      float gy_dps = gy / 16.0f;
-      float gz_dps = gz / 16.0f;
-
-      // Publish accelerometer sensor values
-      if (this->accel_x_sensor_ != nullptr)
-        this->accel_x_sensor_->publish_state(ax_g);
-      if (this->accel_y_sensor_ != nullptr)
-        this->accel_y_sensor_->publish_state(ay_g);
-      if (this->accel_z_sensor_ != nullptr)
-        this->accel_z_sensor_->publish_state(az_g);
-
-      // Publish gyroscope sensor values
-      if (this->gyro_x_sensor_ != nullptr)
-        this->gyro_x_sensor_->publish_state(gx_dps);
-      if (this->gyro_y_sensor_ != nullptr)
-        this->gyro_y_sensor_->publish_state(gy_dps);
-      if (this->gyro_z_sensor_ != nullptr)
-        this->gyro_z_sensor_->publish_state(gz_dps);
-    }
-
-    float QMI8658Component::get_setup_priority() const { return setup_priority::DATA; }
 
   } // namespace qmi8658
 } // namespace esphome

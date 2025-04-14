@@ -48,11 +48,17 @@ logger:
   # level: VERY_VERBOSE
 
 esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
   on_boot:
-    - priority: -200
+    - priority: -200 # LVGL runs with setup_priority::PROCESSOR which is 400.  We want to run this just after LVGL is initialized
       then:
-        # This is useful to force a specific page to show when working on the UI
-        lvgl.page.show: alarm_configuration_alarm_one
+        - logger.log: "Beginning initialization"
+        - script.execute: initialize_clock
+        - wait_until:
+          - not:
+            - script.is_running: initialize_clock
+        - lvgl.page.show: alarm_configuration_alarm_one
 
 # Write preferences to flash a little more frequently
 preferences:

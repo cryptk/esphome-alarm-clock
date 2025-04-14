@@ -109,6 +109,20 @@ esp32:
 preferences:
   flash_write_interval: 15s
 
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  on_boot:
+    - then:
+      # read the RTC time once when the system boots
+      - pcf85063.read_time:
+    # LVGL runs with setup_priority::PROCESSOR which is 400.  We want to run this after LVGL is initialized
+    # Once we are on 2025.4.0b2 or newer, without an LVGL external component, we can replace this with the new LVGL on_boot trigger
+    - priority: -200
+      then:
+        - logger.log: "Beginning initialization"
+        - script.execute: initialize_clock
+
 external_components:
   - source: github://pr#8494
     # This change implements the restore_value parameter on LVGL platform select entities
@@ -123,6 +137,8 @@ external_components:
     components: [qmi8658]
 
 logger:
+  # logs:
+  #   sensor: WARN
 
 psram:
   mode: octal
@@ -397,6 +413,7 @@ time:
     id: pcf85063_time
     i2c_id: i2c_bus
     address: 0x51
+    update_interval: never
   - platform: sntp
     id: sntp_time
     timezone: ${timezone}
@@ -406,41 +423,75 @@ time:
       - 2.pool.ntp.org
     on_time_sync:
       then:
-        - logger.log: "SNTP: time has synchronized"
+        - logger.log: "SNTP: time has synchronized, updating RTC"
+        - pcf85063.write_time:
 
 sensor:
   - platform: qmi8658
     i2c_id: i2c_bus
     address: 0x6B
-    update_interval: 60s
-    accel_output_data_rate: 500
+    update_interval: 100ms
+    accel_output_data_rate: 63
+    interrupt1_pin:
+      pca9554: gpio_expander
+      number: 5
+    interrupt2_pin:
+      pca9554: gpio_expander
+      number: 4
+    no_motion:
+      name: "QMI8658 No Motion Detected"
+      id: no_motion
+    any_motion:
+      name: "QMI8658 Any Motion Detected"
+      id: any_motion
+    significant_motion:
+      name: "QMI8658 Significant Motion Detected"
+      id: significant_motion
     accel_x:
       name: "QMI8658 Accelerometer X"
       id: accel_x
       unit_of_measurement: "g"
       accuracy_decimals: 2
+      filters:
+        - delta: 0.01
+        - throttle_average: 1s
     accel_y:
       name: "QMI8658 Accelerometer Y"
       id: accel_y
       unit_of_measurement: "g"
       accuracy_decimals: 2
+      filters:
+        - delta: 0.01
+        - throttle_average: 1s
     accel_z:
       name: "QMI8658 Accelerometer Z"
       id: accel_z
       unit_of_measurement: "g"
       accuracy_decimals: 2
+      filters:
+        - delta: 0.01
+        - throttle_average: 1s
     gyro_x:
       name: "QMI8658 Gyroscope X"
       id: gyro_x
       unit_of_measurement: "dps"
       accuracy_decimals: 2
+      filters:
+        - delta: 0.5
+        - throttle_average: 1s
     gyro_y:
       name: "QMI8658 Gyroscope Y"
       id: gyro_y
       unit_of_measurement: "dps"
       accuracy_decimals: 2
+      filters:
+        - delta: 0.5
+        - throttle_average: 1s
     gyro_z:
       name: "QMI8658 Gyroscope Z"
       id: gyro_z
       unit_of_measurement: "dps"
       accuracy_decimals: 2
+      filters:
+        - delta: 0.5
+        - throttle_average: 1s

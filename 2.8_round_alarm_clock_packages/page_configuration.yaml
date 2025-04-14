@@ -6,6 +6,7 @@ globals:
 script:
   - id: initialize_clock
     then:
+      - delay: 5s
       - lvgl.page.show: clockface
       - logger.log: "Configuring seconds display"
       - script.execute:

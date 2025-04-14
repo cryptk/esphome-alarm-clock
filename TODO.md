@@ -19,3 +19,7 @@ Build a configuration page:
     - set times to use nighttime screen brightness
 
 Look into leveraging code from https://github.com/jdlambert/micro_tz_db to allow for friendly changing of timezones
+
+Check out the Adafruit HUSB238 module as an example of how to get 12V USB-PD and still get the data pins through
+Likely just don't need to connect the D+/- pins to the HUSB238
+Look into the ESPHome datetime component to simplify the alarms.  Might be able to get rid of the hour/minute numbers.
