@@ -2,8 +2,6 @@
 
 #include "esphome/core/component.h"
 #include "esphome/core/hal.h"
-#include "esphome/components/sensor/sensor.h"
-#include "esphome/components/binary_sensor/binary_sensor.h"
 #include "esphome/components/i2c/i2c.h"
 
 namespace esphome
@@ -109,90 +107,89 @@ namespace esphome
       QMI8658_STATE_ONLINE
     } qmi8658_state_t;
 
-    class QMI8658Component : public PollingComponent, public i2c::I2CDevice
-    {
-    public:
-      void setup() override;
-      void dump_config() override;
+    class QMI8658SensorComponent;
+    class QMI8658BinarySensorComponent;
 
-      void loop() override;
-      void update() override;
+    class QMI8658Component: public Component, public i2c::I2CDevice {
+      public:
+        void setup() override;
+        void dump_config() override;
 
-      float get_setup_priority() const override;
+        void loop() override;
 
-      void set_accel_x_sensor(sensor::Sensor *accel_x_sensor) { accel_x_sensor_ = accel_x_sensor; };
-      void set_accel_y_sensor(sensor::Sensor *accel_y_sensor) { accel_y_sensor_ = accel_y_sensor; };
-      void set_accel_z_sensor(sensor::Sensor *accel_z_sensor) { accel_z_sensor_ = accel_z_sensor; };
-      void set_accel_output_data_rate(uint16_t accel_output_data_rate) { accel_output_data_rate_ = accel_output_data_rate; };
-      void set_gyro_x_sensor(sensor::Sensor *gyro_x_sensor) { gyro_x_sensor_ = gyro_x_sensor; };
-      void set_gyro_y_sensor(sensor::Sensor *gyro_y_sensor) { gyro_y_sensor_ = gyro_y_sensor; };
-      void set_gyro_z_sensor(sensor::Sensor *gyro_z_sensor) { gyro_z_sensor_ = gyro_z_sensor; };
-      void set_temperature_sensor(sensor::Sensor *temperature_sensor) { temperature_sensor_ = temperature_sensor; }
+        float get_setup_priority() const override;
 
-      void set_no_motion_detected_sensor(binary_sensor::BinarySensor *no_motion_detected_sensor) { no_motion_detected_sensor_ = no_motion_detected_sensor; };
-      void set_any_motion_detected_sensor(binary_sensor::BinarySensor *any_motion_detected_sensor) { any_motion_detected_sensor_ = any_motion_detected_sensor; };
-      void set_significant_motion_detected_sensor(binary_sensor::BinarySensor *significant_motion_detected_sensor) { significant_motion_detected_sensor_ = significant_motion_detected_sensor; };
+        void set_accel_output_data_rate(uint16_t accel_output_data_rate) { accel_output_data_rate_ = accel_output_data_rate; };
+        void set_accel_scale(uint8_t accel_scale) { accel_scale_ = accel_scale; };
+        void set_accel_sensitivity(uint16_t accel_sensitivity) { accel_sensitivity_ = accel_sensitivity; };
 
-      void set_interrupt1_pin(GPIOPin *interrupt1_pin) {interrupt1_pin_ = interrupt1_pin; };
-      void set_interrupt2_pin(GPIOPin *interrupt2_pin) {interrupt2_pin_ = interrupt2_pin; };
+        void set_gyro_output_data_rate(uint16_t gyro_output_data_rate) { gyro_output_data_rate_ = gyro_output_data_rate; };
+        void set_gyro_scale(uint16_t gyro_scale) { gyro_scale_ = gyro_scale; };
+        void set_gyro_sensitivity(uint16_t gyro_sensitivity) { gyro_sensitivity_ = gyro_sensitivity; };
+
+        friend class QMI8658SensorComponent;
+        friend class QMI8658BinarySensorComponent;
       
       protected:
-      sensor::Sensor *accel_x_sensor_{nullptr};
-      sensor::Sensor *accel_y_sensor_{nullptr};
-      sensor::Sensor *accel_z_sensor_{nullptr};
-      sensor::Sensor *gyro_x_sensor_{nullptr};
-      sensor::Sensor *gyro_y_sensor_{nullptr};
-      sensor::Sensor *gyro_z_sensor_{nullptr};
+        void initialize_();
 
-      sensor::Sensor *temperature_sensor_{nullptr};
+        uint16_t accel_output_data_rate_{};
+        uint8_t accel_scale_{};
+        uint16_t accel_sensitivity_{};
+        void configure_accel_output_data_rate_();
+        void configure_accel_scale_();
 
-      binary_sensor::BinarySensor *no_motion_detected_sensor_{nullptr};
-      binary_sensor::BinarySensor *any_motion_detected_sensor_{nullptr};
-      binary_sensor::BinarySensor *significant_motion_detected_sensor_{nullptr};
+        uint16_t gyro_output_data_rate_{};
+        uint16_t gyro_scale_{};
+        uint16_t gyro_sensitivity_{};
+        void configure_gyro_output_data_rate_();
+        void configure_gyro_scale_();
 
-      // Control Registers
-      i2c::I2CRegister ctrl1_register_ = this->reg(QMI8658_REG_CTRL1);
-      i2c::I2CRegister ctrl2_register_ = this->reg(QMI8658_REG_CTRL2);
-      i2c::I2CRegister ctrl3_register_ = this->reg(QMI8658_REG_CTRL3);
-      i2c::I2CRegister ctrl4_register_ = this->reg(QMI8658_REG_CTRL4);
-      i2c::I2CRegister ctrl5_register_ = this->reg(QMI8658_REG_CTRL5);
-      i2c::I2CRegister ctrl6_register_ = this->reg(QMI8658_REG_CTRL6);
-      i2c::I2CRegister ctrl7_register_ = this->reg(QMI8658_REG_CTRL7);
-      i2c::I2CRegister ctrl8_register_ = this->reg(QMI8658_REG_CTRL8);
-      i2c::I2CRegister ctrl9_register_ = this->reg(QMI8658_REG_CTRL9);
+        // Control Registers
+        i2c::I2CRegister ctrl1_register_ = this->reg(QMI8658_REG_CTRL1);
+        i2c::I2CRegister ctrl2_register_ = this->reg(QMI8658_REG_CTRL2);
+        i2c::I2CRegister ctrl3_register_ = this->reg(QMI8658_REG_CTRL3);
+        i2c::I2CRegister ctrl4_register_ = this->reg(QMI8658_REG_CTRL4);
+        i2c::I2CRegister ctrl5_register_ = this->reg(QMI8658_REG_CTRL5);
+        i2c::I2CRegister ctrl6_register_ = this->reg(QMI8658_REG_CTRL6);
+        i2c::I2CRegister ctrl7_register_ = this->reg(QMI8658_REG_CTRL7);
+        i2c::I2CRegister ctrl8_register_ = this->reg(QMI8658_REG_CTRL8);
+        i2c::I2CRegister ctrl9_register_ = this->reg(QMI8658_REG_CTRL9);
 
-      // Calibration Registers
-      i2c::I2CRegister cal1_l_register_ = this->reg(QMI8658_REG_CAL1_L);
-      i2c::I2CRegister cal1_h_register_ = this->reg(QMI8658_REG_CAL1_H);
-      i2c::I2CRegister cal2_l_register_ = this->reg(QMI8658_REG_CAL2_L);
-      i2c::I2CRegister cal2_h_register_ = this->reg(QMI8658_REG_CAL2_H);
-      i2c::I2CRegister cal3_l_register_ = this->reg(QMI8658_REG_CAL3_L);
-      i2c::I2CRegister cal3_h_register_ = this->reg(QMI8658_REG_CAL3_H);
-      i2c::I2CRegister cal4_l_register_ = this->reg(QMI8658_REG_CAL4_L);
-      i2c::I2CRegister cal4_h_register_ = this->reg(QMI8658_REG_CAL4_H);
+        // Calibration Registers
+        i2c::I2CRegister cal1_l_register_ = this->reg(QMI8658_REG_CAL1_L);
+        i2c::I2CRegister cal1_h_register_ = this->reg(QMI8658_REG_CAL1_H);
+        i2c::I2CRegister cal2_l_register_ = this->reg(QMI8658_REG_CAL2_L);
+        i2c::I2CRegister cal2_h_register_ = this->reg(QMI8658_REG_CAL2_H);
+        i2c::I2CRegister cal3_l_register_ = this->reg(QMI8658_REG_CAL3_L);
+        i2c::I2CRegister cal3_h_register_ = this->reg(QMI8658_REG_CAL3_H);
+        i2c::I2CRegister cal4_l_register_ = this->reg(QMI8658_REG_CAL4_L);
+        i2c::I2CRegister cal4_h_register_ = this->reg(QMI8658_REG_CAL4_H);
 
-      i2c::I2CRegister statusint_register_ = this->reg(QMI8658_REG_STATUSINT);
-      i2c::I2CRegister status0_register_ = this->reg(QMI8658_REG_STATUS0);
-      i2c::I2CRegister status1_register_ = this->reg(QMI8658_REG_STATUS1);
+        // Accelerometer Registers
+        i2c::I2CRegister accel_x_l_register_ = this->reg(QMI8658_REG_AX_L);
+        i2c::I2CRegister accel_x_h_register_ = this->reg(QMI8658_REG_AX_H);
+        i2c::I2CRegister accel_y_l_register_ = this->reg(QMI8658_REG_AY_L);
+        i2c::I2CRegister accel_y_h_register_ = this->reg(QMI8658_REG_AY_H);
+        i2c::I2CRegister accel_z_l_register_ = this->reg(QMI8658_REG_AZ_L);
+        i2c::I2CRegister accel_z_h_register_ = this->reg(QMI8658_REG_AZ_H);
 
-      i2c::I2CRegister reset_register_ = this->reg(QMI8658_REG_RESET);
-            
-      uint16_t accel_output_data_rate_{};
+        // Gyroscope Registers
+        i2c::I2CRegister gyro_x_l_register_ = this->reg(QMI8658_REG_GX_L);
+        i2c::I2CRegister gyro_x_h_register_ = this->reg(QMI8658_REG_GX_H);
+        i2c::I2CRegister gyro_y_l_register_ = this->reg(QMI8658_REG_GY_L);
+        i2c::I2CRegister gyro_y_h_register_ = this->reg(QMI8658_REG_GY_H);
+        i2c::I2CRegister gyro_z_l_register_ = this->reg(QMI8658_REG_GZ_L);
+        i2c::I2CRegister gyro_z_h_register_ = this->reg(QMI8658_REG_GZ_H);
 
-      GPIOPin *interrupt1_pin_{nullptr};
-      void handle_interrupt1_();
-      GPIOPin *interrupt2_pin_{nullptr};
-      void handle_interrupt2_();
+        i2c::I2CRegister statusint_register_ = this->reg(QMI8658_REG_STATUSINT);
+        i2c::I2CRegister status0_register_ = this->reg(QMI8658_REG_STATUS0);
+        i2c::I2CRegister status1_register_ = this->reg(QMI8658_REG_STATUS1);
 
-      qmi8658_state_t current_state_ = QMI8658_STATE_UNKNOWN;
-
-      void configure_accel_output_data_rate_();
-      float read_accel_gyro_data_(const uint8_t lower_register, const uint8_t higher_register, float sensitivity);
-      void initialize_();
-      void configure_motion_interrupts_();
-
+        i2c::I2CRegister reset_register_ = this->reg(QMI8658_REG_RESET);
+              
+        qmi8658_state_t current_state_ = QMI8658_STATE_UNKNOWN;
     };
-    ;
 
   } // namespace qmi8658
 } // namespace esphome
