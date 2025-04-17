@@ -116,18 +116,8 @@ esphome:
     - then:
       # read the RTC time once when the system boots
       - pcf85063.read_time:
-    # LVGL runs with setup_priority::PROCESSOR which is 400.  We want to run this after LVGL is initialized
-    # Once we are on 2025.4.0b2 or newer, without an LVGL external component, we can replace this with the new LVGL on_boot trigger
-    - priority: -200
-      then:
-        - logger.log: "Beginning initialization"
-        - script.execute: initialize_clock
 
 external_components:
-  - source: github://pr#8494
-    # This change implements the restore_value parameter on LVGL platform select entities
-    components: [lvgl]
-    refresh: 1h
   - source: github://cryptk/esphome_sd_card
     components: [sd_mmc_card]
     refresh: 1h

@@ -4,27 +4,6 @@
 # - Maybe replace this with a custom component to clean things up
 # - Ensure that skipped alarms (I.E: Daylight Savings) will still go off
 
-esphome:
-  on_boot:
-    - priority: -200
-      then:
-        - number.set:
-            id: ${name}_number_hour
-            value: !lambda 'return id(${name}_global_hour);'
-        - number.set:
-            id: ${name}_number_minute
-            value: !lambda 'return id(${name}_global_minute);'
-
-globals:
-  - id: ${name}_global_hour
-    type: int
-    restore_value: yes
-    initial_value: "7"
-  - id: ${name}_global_minute
-    type: int
-    restore_value: yes
-    initial_value: "0"
-
 number:
   - id: ${name}_number_hour
     platform: template
@@ -32,11 +11,9 @@ number:
     min_value: 0
     max_value: 23
     step: 1.0
-    optimistic: true
+    restore_value: true
     set_action:
-      - globals.set:
-          id: ${name}_global_hour
-          value: !lambda 'return x;'
+      # Rollers don't natively work with Number components so we need to do a bit of work with set_action to wire them together
       - lvgl.roller.update:
           id: ${name}_ui_roller_hour
           animated: true
@@ -47,11 +24,9 @@ number:
     min_value: 00
     max_value: 59
     step: 1.0
-    optimistic: true
+    restore_value: true
     set_action:
-      - globals.set:
-          id: ${name}_global_minute
-          value: !lambda "return x;"
+      # Rollers don't natively work with Number components so we need to do a bit of work with set_action to wire them together
       - lvgl.roller.update:
           id: ${name}_ui_roller_minute
           animated: true
@@ -249,13 +224,16 @@ lvgl:
             selected:
               styles: theme_roller_time_selected
             options: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+            # Rollers don't natively work with Number components so we need to do a bit of work with on_boot and on_change to wire them together
+            on_boot:
+              - lvgl.roller.update:
+                  id: ${name}_ui_roller_hour
+                  animated: true
+                  selected_index: !lambda "return id(${name}_number_hour).state;"
             on_change:
-              - logger.log:
-                  format: "Roller changed: %s"
-                  args: [text.c_str()]
               - number.set:
                   id: ${name}_number_hour
-                  value: !lambda 'return std::stoi(text);'
+                  value: !lambda "return std::stoi(text);"
         - label:
             text: ":"
             text_font: ${font_xxlarge}
@@ -273,10 +251,16 @@ lvgl:
             selected:
               styles: theme_roller_time_selected
             options: ["00","01","02","03","04","05","06","07","08","09",10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59]
+            # Rollers don't natively work with Number components so we need to do a bit of work with on_boot and on_change to wire them together
+            on_boot:
+              - lvgl.roller.update:
+                  id: ${name}_ui_roller_minute
+                  animated: true
+                  selected_index: !lambda "return id(${name}_number_minute).state;"
             on_change:
               - number.set:
                   id: ${name}_number_minute
-                  value: !lambda 'return std::stoi(text);'
+                  value: !lambda "return std::stoi(text);"
         - buttonmatrix:
             align: center
             y: 90
