@@ -435,78 +435,54 @@ qmi8658:
 #       unit_of_measurement: "g"
 #       accuracy_decimals: 2
 #       filters:
-#         - lambda: |-
-#             static float last_value_ax = 0;
-#             float change = 0;
-#             change = x - last_value_ax;
-#             last_value_ax = x;
-#             return change;
-#       #   - delta: 0.05
+#         - or:
+#           - throttle: 1s
+#           - delta: 0.5
 #     accel_y:
 #       name: "QMI8658 Accelerometer Y"
 #       id: accel_y
 #       unit_of_measurement: "g"
 #       accuracy_decimals: 2
 #       filters:
-#         - lambda: |-
-#             static float last_value_ay = 0;
-#             float change = 0;
-#             change = x - last_value_ay;
-#             last_value_ay = x;
-#             return change;
-#       #   - delta: 0.05
+#         - or:
+#           - throttle: 1s
+#           - delta: 0.5
 #     accel_z:
 #       name: "QMI8658 Accelerometer Z"
 #       id: accel_z
 #       unit_of_measurement: "g"
 #       accuracy_decimals: 2
 #       filters:
-#         - lambda: |-
-#             static float last_value_az = 0;
-#             float change = 0;
-#             change = x - last_value_az;
-#             last_value_az = x;
-#             return change;
-#       #   - delta: 0.05
+#         - or:
+#           - throttle: 1s
+#           - delta: 0.5
 #     gyro_x:
 #       name: "QMI8658 Gyroscope X"
 #       id: gyro_x
 #       unit_of_measurement: "dps"
 #       accuracy_decimals: 2
 #       filters:
-#         - lambda: |-
-#             static float last_value_gx = 0;
-#             float change = 0;
-#             change = x - last_value_gx;
-#             last_value_gx = x;
-#             return change;
-#       #   - delta: 0.5
+#         - or:
+#           - throttle: 1s
+#           - delta: 5
 #     gyro_y:
 #       name: "QMI8658 Gyroscope Y"
 #       id: gyro_y
 #       unit_of_measurement: "dps"
 #       accuracy_decimals: 2
 #       filters:
-#         - lambda: |-
-#             static float last_value_gy = 0;
-#             float change = 0;
-#             change = x - last_value_gy;
-#             last_value_gy = x;
-#             return change;
-#       #   - delta: 0.5
+#         - or:
+#           - throttle: 1s
+#           - delta: 5
 #     gyro_z:
 #       name: "QMI8658 Gyroscope Z"
 #       id: gyro_z
 #       unit_of_measurement: "dps"
 #       accuracy_decimals: 2
 #       filters:
-#         - lambda: |-
-#             static float last_value_gz = 0;
-#             float change = 0;
-#             change = x - last_value_gz;
-#             last_value_gz = x;
-#             return change;
-#       #   - delta: 0.5
+#         - or:
+#           - throttle: 1s
+#           - delta: 5
 
 binary_sensor:
   - platform: qmi8658

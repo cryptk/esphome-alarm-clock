@@ -12,6 +12,15 @@ namespace esphome
     static constexpr uint8_t QMI8658_STATUS1_NO_MOTION_MASK = 0x40;
     static constexpr uint8_t QMI8658_STATUS1_SIGNIFICANT_MOTION_MASK = 0x80;
 
+    void splitUint16(uint16_t input, uint8_t& lowerByte, uint8_t& higherByte) {
+      // Use bitwise AND with a mask to isolate the lower 8 bits.
+      lowerByte = static_cast<uint8_t>(input & 0xFF);
+    
+      // Use right bit shift to move the higher 8 bits to the lower position.
+      // Then, cast to uint8_t to store only those bits.
+      higherByte = static_cast<uint8_t>((input >> 8) & 0xFF);
+    }
+
     void QMI8658BinarySensorComponent::setup()
     {
       ESP_LOGCONFIG(TAG, "Setting up QMI8658 Binary Sensors...");
@@ -25,8 +34,18 @@ namespace esphome
         ESP_LOGE(TAG, "Communication with QMI8658 failed!");
       }
       LOG_BINARY_SENSOR("  ", "No Motion Sensor", this->no_motion_detected_sensor_);
+      ESP_LOGCONFIG(TAG, "    X Threshold: %d", this->no_motion_x_threshold_);
+      ESP_LOGCONFIG(TAG, "    Y Threshold: %d", this->no_motion_y_threshold_);
+      ESP_LOGCONFIG(TAG, "    Z Threshold: %d", this->no_motion_z_threshold_);
+      ESP_LOGCONFIG(TAG, "    Window: %d", this->no_motion_window_);
       LOG_BINARY_SENSOR("  ", "Any Motion Sensor", this->any_motion_detected_sensor_);
+      ESP_LOGCONFIG(TAG, "    X Threshold: %d", this->any_motion_x_threshold_);
+      ESP_LOGCONFIG(TAG, "    Y Threshold: %d", this->any_motion_y_threshold_);
+      ESP_LOGCONFIG(TAG, "    Z Threshold: %d", this->any_motion_z_threshold_);
+      ESP_LOGCONFIG(TAG, "    Window: %d", this->any_motion_window_);
       LOG_BINARY_SENSOR("  ", "Significant Motion Sensor", this->significant_motion_detected_sensor_);
+      ESP_LOGCONFIG(TAG, "    Wait Window: %d", this->significant_motion_wait_window_);
+      ESP_LOGCONFIG(TAG, "    Confirm Window: %d", this->significant_motion_confirm_window_);
     }
 
     float QMI8658BinarySensorComponent::get_setup_priority() const { return setup_priority::DATA; }
@@ -65,47 +84,26 @@ namespace esphome
     }
 
     void QMI8658BinarySensorComponent::configure_motion_interrupts_() {
-      // TODO: This should be togglable and configurable functionality
-
-      // Determines how much motion there must be
-      // This is a difference in value between subsequent samples measured in units of 1/32nd of a g of acceleration
-      auto AnyMotionXThr = 0x03;
-      auto AnyMotionYThr = 0x03;
-      auto AnyMotionZThr = 0x03;
-      // measured in number of samples based on the Accelerometer Output Data Rate
-      // 0x0A == 10
-      auto AnyMotionWindow = 0x03;
-
-      auto NoMotionXThr = 0x01;
-      auto NoMotionYThr = 0x01;
-      auto NoMotionZThr = 0x01;
-      // measured in number of samples based on the Accelerometer Output Data Rate
-      // 0xC8 == 200
-      auto NoMotionWindow = 0xFF;
-
-      auto CTRL9_CMD_CONFIGURE_MOTION = 0x0E;
-      auto CTRL9_CMD_ACK = 0x00;
+      // These will be used later when sending the significant motion window settings
+      uint8_t lower, higher;
 
       // Configuration of motion engines should be done while accelerometer and gyro are disabled per datasheet
       // Disable Accel and Gyro
-      this->qmi8658_->ctrl7_register_ &= 0xFC;
+      this->qmi8658_->ctrl7_register_ &= ~(QMI8658_CTRL7_GYRO_ENABLE_MASK | QMI8658_CTRL7_ACCEL_ENABLE_MASK);
 
-      // ESP_LOGD(TAG, "Register status: %d", this->cal1_l_register_.get());
-      // range 0-255, 0x80 == 128
       // AnyMotionXThr
-      this->qmi8658_->cal1_l_register_ = AnyMotionXThr;
+      this->qmi8658_->cal1_l_register_ = this->any_motion_x_threshold_;
       // AnyMotionYThr
-      this->qmi8658_->cal1_h_register_ = AnyMotionYThr;
+      this->qmi8658_->cal1_h_register_ = this->any_motion_y_threshold_;
       // AnyMotionZThr
-      this->qmi8658_->cal2_l_register_ = AnyMotionZThr;
+      this->qmi8658_->cal2_l_register_ = this->any_motion_z_threshold_;
 
-      // range 0-255, 0x40 == 64
       // AnyMotionXThr
-      this->qmi8658_->cal2_h_register_ = NoMotionXThr;
+      this->qmi8658_->cal2_h_register_ = this->no_motion_x_threshold_;
       // AnyMotionYThr
-      this->qmi8658_->cal3_l_register_ = NoMotionYThr;
+      this->qmi8658_->cal3_l_register_ = this->no_motion_y_threshold_;
       // AnyMotionZThr
-      this->qmi8658_->cal3_h_register_ = NoMotionZThr;
+      this->qmi8658_->cal3_h_register_ = this->no_motion_z_threshold_;
 
       //MOTION_MODE_CTRL
       // 0xF7 == NoMotion requires ALL axises to be still (AND), AnyMotion requires ANY axis to have motion (OR)
@@ -116,61 +114,48 @@ namespace esphome
       this->qmi8658_->cal4_h_register_ = 0x01;
 
       // Push config
-      this->qmi8658_->ctrl9_register_ = CTRL9_CMD_CONFIGURE_MOTION;
-      delay(10);
-      if (this->qmi8658_->statusint_register_.get() & 0x80 != 0x80) {
-        ESP_LOGE(TAG, "Configure Motion Command 1 Failure");
-      }
-      ESP_LOGD(TAG, "Configure Motion Command 1 Success");
-      this->qmi8658_->ctrl9_register_ = CTRL9_CMD_ACK;
-      delay(10);
-      if (this->qmi8658_->statusint_register_.get() & 0x80 != 0x00) {
-        ESP_LOGE(TAG, "QMI Failed to clear STATUSINT after Command 1");
+      bool success = this->qmi8658_->send_ctrl9_command_(QMI8658_CTRL9_CMD_CONFIGURE_MOTION);
+      if(!success) {
+        ESP_LOGD(TAG, "Failed to configure motion 1");
+        this->mark_failed();
       }
 
       // AnyMotionWindow
-      // TODO: Validate that these registers are zeroed out after the CTRL_CMD_CONFIGURE_MOTION command above before writing to them again
-      // ESP_LOGD(TAG, "Register status: %d", this->cal1_l_register_.get());
-      this->qmi8658_->cal1_l_register_ = AnyMotionWindow;
-
+      this->qmi8658_->cal1_l_register_ = this->any_motion_window_;
       //NoMotionWindow
-      this->qmi8658_->cal1_h_register_ = NoMotionWindow;
+      this->qmi8658_->cal1_h_register_ = this->no_motion_window_;
 
-      // SigMotionWaitWindow == 100 samples
-      this->qmi8658_->cal2_l_register_ = 0x64;
-      this->qmi8658_->cal2_h_register_ = 0x00;
+      // SigMotionWaitWindow
+      splitUint16(this->significant_motion_wait_window_, lower, higher);
+      this->qmi8658_->cal2_l_register_ = lower;
+      this->qmi8658_->cal2_h_register_ = higher;
 
-      // SigMotionConfirmWindow == 65535 samples
-      this->qmi8658_->cal3_l_register_ = 0xFF;
-      this->qmi8658_->cal3_h_register_ = 0xFF;
+      // SigMotionConfirmWindow
+      splitUint16(this->significant_motion_confirm_window_, lower, higher);
+      this->qmi8658_->cal3_l_register_ = lower;
+      this->qmi8658_->cal3_h_register_ = higher;
 
       // Sending second configuration command
       this->qmi8658_->cal4_h_register_ = 0x02;
 
       // Push config
-      this->qmi8658_->ctrl9_register_ = CTRL9_CMD_CONFIGURE_MOTION;
-      delay(10);
-      if (this->qmi8658_->statusint_register_.get() & 0x80 != 0x80) {
-        ESP_LOGE(TAG, "Configure Motion Command 2 Failure");
-      }
-      ESP_LOGD(TAG, "Configure Motion Command 2 Success");
-      this->qmi8658_->ctrl9_register_ = CTRL9_CMD_ACK;
-      delay(10);
-      if (this->qmi8658_->statusint_register_.get() & 0x80 != 0x00) {
-        ESP_LOGE(TAG, "QMI Failed to clear STATUSINT after Command 2");
+      success = this->qmi8658_->send_ctrl9_command_(QMI8658_CTRL9_CMD_CONFIGURE_MOTION);
+      if(!success) {
+        ESP_LOGD(TAG, "Failed to configure motion 2");
+        this->mark_failed();
       }
 
       // Set motion engine to use interrupt 1 pin
-      this->qmi8658_->ctrl8_register_ |= 0x40;
+      this->qmi8658_->ctrl8_register_ |= QMI8658_CTRL8_ACTIVITY_INT_SELECT_MASK;
 
       // Enable Int1 pin
-      this->qmi8658_->ctrl1_register_ |= 0x08;
+      this->qmi8658_->ctrl1_register_ |= QMI8658_CTRL1_INT1_EN_MASK;
 
       // Re-Enable Accel and Gyro
-      this->qmi8658_->ctrl7_register_ |= 0x03;
+      this->qmi8658_->ctrl7_register_ |= QMI8658_CTRL7_GYRO_ENABLE_MASK | QMI8658_CTRL7_ACCEL_ENABLE_MASK;
 
       // Enable Any, No and Significant Motion engines (this might need to be done after accelerometer is enabled)
-      this->qmi8658_->ctrl8_register_ |= 0x0E;
+      this->qmi8658_->ctrl8_register_ |= QMI8658_CTRL8_ANY_MOTION_ENABLE_MASK | QMI8658_CTRL8_NO_MOTION_ENABLE_MASK | QMI8658_CTRL8_SIGNIFICANT_MOTION_ENABLE_MASK;
 
       this->current_state_ = QMI8658_STATE_ONLINE;
       

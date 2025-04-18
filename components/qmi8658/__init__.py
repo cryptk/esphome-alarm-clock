@@ -4,15 +4,6 @@ import esphome.config_validation as cv
 from esphome import automation, pins
 from esphome.const import (
     CONF_ID,
-    CONF_TEMPERATURE,
-    DEVICE_CLASS_TEMPERATURE,
-    DEVICE_CLASS_MOTION,
-    ICON_BRIEFCASE_DOWNLOAD,
-    ICON_SCREEN_ROTATION,
-    STATE_CLASS_MEASUREMENT,
-    UNIT_CELSIUS,
-    UNIT_DEGREE_PER_SECOND,
-    UNIT_METER_PER_SECOND_SQUARED,
 )
 
 DEPENDENCIES = ["i2c", "qmi8658"]
